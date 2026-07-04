@@ -1,6 +1,6 @@
 # 技术知识库索引
 
-最后更新: 2026-07-04 16:03
+最后更新: 2026-07-04 18:31
 文档总数: 15
 
 ## 快速检索
@@ -63,7 +63,7 @@
 #### skills (2 篇)
 
 - [Learn Session Knowledge](./skills/learn-session-knowledge/SKILL.md)
-  核心原则 先找当前项目自己的沉淀协议；只有项目没有协议时，才使用本 skill 的 fallback 规则。沉淀只记录未来 agent 需要复用、且无法从代码或 git 历史直接看出的知识。 协议读取顺序 1. 读取当前项目的 docs/rules/learning-protocol.md。 2. 如果不存在，检查项目 AGENTS.md、CLAUDE.md、WORKSPACE.md、worksp...
+  Job Turn a finished or interrupted session into reusable knowledge. Do not write a diary. Produce an artifact that another agent can use without seeing the original chat. First 3 Minutes If this skill...
 
 - [GitHub Browser Create Files](./skills/github-browser-create-files/SKILL.md)
   Hard Constraints - Do not use git push, GitHub write APIs, or direct repository upload controls. - Do not click Upload files. - Do not use Playwright setInputFiles or inputtype="file". - Use GitHub we...
@@ -257,7 +257,7 @@
 
 **分类**: skills
 
-核心原则 先找当前项目自己的沉淀协议；只有项目没有协议时，才使用本 skill 的 fallback 规则。沉淀只记录未来 agent 需要复用、且无法从代码或 git 历史直接看出的知识。 协议读取顺序 1. 读取当前项目的 docs/rules/learning-protocol.md。 2. 如果不存在，检查项目 AGENTS.md、CLAUDE.md、WORKSPACE.md、worksp...
+Job Turn a finished or interrupted session into reusable knowledge. Do not write a diary. Produce an artifact that another agent can use without seeing the original chat. First 3 Minutes If this skill...
 
 ---
 
