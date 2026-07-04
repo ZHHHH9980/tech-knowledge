@@ -1,124 +1,345 @@
 ---
 name: learn-session-knowledge
-description: Use when a user asks to learn, remember, capture lessons, record reusable workflow knowledge, preserve a session discovery, or make future agents able to reuse current work.
+description: Use when the user asks to learn, remember, capture lessons, record reusable workflow knowledge, preserve session discoveries, update a knowledge base, or make future agents reuse current work.
 ---
 
 # Learn Session Knowledge
 
-## 核心原则
+## Job
 
-先找当前项目自己的沉淀协议；只有项目没有协议时，才使用本 skill 的 fallback 规则。沉淀只记录未来 agent 需要复用、且无法从代码或 git 历史直接看出的知识。
+Turn a finished or interrupted session into reusable knowledge. Do not write a diary. Produce an artifact that another agent can use without seeing the original chat.
 
-## 协议读取顺序
+## First 3 Minutes
 
-1. 读取当前项目的 `docs/rules/learning-protocol.md`。
-2. 如果不存在，检查项目 `AGENTS.md`、`CLAUDE.md`、`WORKSPACE.md`、`workspace.yaml` 中是否指向沉淀协议或长期记忆规则。
-3. 如果项目协议存在，以项目协议为唯一规则来源，不再套用 fallback。
-4. 如果项目协议不存在，使用下方 fallback。
+If this skill includes `scripts/inspect-learning-context.sh`, run it from the target project root:
 
-## Fallback 触发条件
+```bash
+bash skills/learn-session-knowledge/scripts/inspect-learning-context.sh .
+```
 
-满足任一条件才沉淀：
+If the script is not available, run these checks manually:
 
-- 为理解一条链路读了 3 个以上文件。
-- 排查完 bug 并定位到根因。
-- 发现外部依赖、平台、浏览器、CI、登录态、权限等 failure mode。
-- 理清模块职责边界、状态流转或关键分支。
-- 为回答问题做了大量搜索、源码阅读或实验。
-- 踩到非显而易见、下个 agent 可能再踩的坑。
-- 发现可跨项目复用的工具使用方式或环境约束。
+```bash
+pwd
+git status --short --branch 2>/dev/null || true
+test -f docs/rules/learning-protocol.md && sed -n '1,260p' docs/rules/learning-protocol.md
+for f in AGENTS.md CLAUDE.md WORKSPACE.md WORKSPACE.markdown workspace.yaml workspace.yml; do test -f "$f" && grep -nEi 'learn|learning|memory|沉淀|记忆|knowledge' "$f"; done
+find . -maxdepth 3 \( -name 'README*' -o -name 'INDEX.md' \) 2>/dev/null | sort | head -80
+```
 
-如果都不满足，直接回复：`本次无需沉淀`。
+Then state which protocol is active:
 
-## 归属判断
+- **Project protocol found**: follow it as the only source of truth.
+- **No project protocol**: use the default protocol below.
 
-判断标准：换一个人接手同类任务，他需要知道这个吗？
+## Default Learning Protocol
 
-| 类型 | 写入位置 | 例子 |
+Use only when the project has no own learning protocol.
+
+1. **Worth recording?** Record only verified, reusable knowledge that future agents are likely to need.
+2. **Where does it belong?** Choose the narrowest durable home:
+   - project behavior -> relevant project README near the code
+   - cross-project workflow -> shared knowledge repo or `skills/<name>/SKILL.md`
+   - user preference / agent correction -> memory tool or final-answer summary
+3. **Avoid duplication.** Search nearby README, index files, and existing rules before writing.
+4. **Write operationally.** Include trigger, decision points, exact steps, failure modes, and verification.
+5. **Protect rule files.** Do not edit `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or similar rule files unless the user explicitly asks to maintain stable rules.
+6. **Verify.** Check file content, formatting, absence of unfinished markers, and explain why this qualified for learning.
+
+## Read Project Entrypoints
+
+If no project learning protocol exists, use entrypoint files to understand the repository shape. Do not copy their examples blindly; translate their ownership model into the note location.
+
+Read in this order when present:
+
+1. `docs/rules/learning-protocol.md`: if present, stop here and follow it as the only rule source.
+2. `AGENTS.md`, `CLAUDE.md`, `WORKSPACE.md`, `WORKSPACE.markdown`, `workspace.yaml`, `workspace.yml`: scan for repository layout, ownership, docs locations, memory rules, and forbidden edits.
+3. Root `README.md` and nearby `README*`: use them to learn category names and index/update commands.
+
+Example `workspace.yaml`:
+
+```yaml
+projects:
+  - name: api
+    path: services/api
+  - name: web
+    path: apps/web
+  - name: shared-auth
+    path: packages/auth
+docs:
+  runbooks: docs/runbooks
+  decisions: docs/adr
+```
+
+Interpretation:
+
+- API-only discovery -> `services/api/README_<topic>.md` or an existing docs file under that service.
+- Web route/component discovery -> `apps/web/.../README_<topic>.md` near the owning feature.
+- Shared auth behavior -> `packages/auth/README_<topic>.md`.
+- Cross-service incident/debug process -> `docs/runbooks/<topic>.md`.
+- Architecture decision -> `docs/adr/<decision-name>.md`.
+
+Example `WORKSPACE.md`:
+
+```markdown
+# Workspace
+
+- Apps live in `apps/*`.
+- Shared packages live in `packages/*`.
+- Environment and deployment runbooks live in `deploy/` and `docs/runbooks/`.
+- Prefer local README files for module behavior; use root docs only for cross-cutting rules.
+```
+
+Interpretation:
+
+- Put module behavior beside the app/package that owns it.
+- Put deploy failure modes under `deploy/` or `docs/runbooks/`.
+- Do not create a broad root note when the entrypoint says local README files are preferred.
+
+## Trigger Test
+
+Create a learning artifact if at least one is true:
+
+| Trigger | Example |
+| --- | --- |
+| Read 3+ files to understand a workflow | Traced service state across gateway, worker, and database docs |
+| Found root cause of a non-obvious bug | Browser automation failed because CodeMirror state was not updated |
+| Found external failure mode | GitHub UI changed selectors; SSL navigation needs retry |
+| Clarified durable boundary/contract | Which status field owns manual review state |
+| Did substantial research | Compared multiple docs or source files to decide behavior |
+| User corrected agent behavior | "Do not use Upload files; use Create new file" |
+| Built reusable automation | Browser-only GitHub write script future agents can reuse |
+
+If none apply, reply exactly: `本次无需沉淀`.
+
+## Destination Decision
+
+Use this table before writing:
+
+| Knowledge | Destination | Do not put it in |
 | --- | --- | --- |
-| 项目级知识 | 相关代码同级 README 或项目约定文档 | 调用链、字段含义、部署排查 playbook |
-| 跨项目流程 | 共享知识库或 `skills/<name>/SKILL.md` | GitHub 浏览器写文件、learn 工作流 |
-| Codex/session memory | 记忆工具；没有持久记忆工具时在最终回复给出摘要 | 用户偏好、账号访问习惯、agent 行为纠偏 |
+| Code path, API contract, data flow | README near code or project docs | shared skill |
+| Debugging playbook for one system | project docs near system | global rule file |
+| Cross-project agent workflow | `skills/<skill-name>/SKILL.md` in shared knowledge repo | product repo README |
+| Personal preference or account habit | memory/final summary | project docs |
+| Temporary session facts | nowhere | any persistent file |
 
-两者都有时，项目文件只写代码/系统相关结论；个人排查路径、工具习惯、用户偏好放 memory 或共享 skill。
+When both project and cross-project value exist, split them. Project file gets project facts; skill gets reusable process.
 
-## 执行流程
+## Fit The Project Structure
 
-1. 确认目标目录的 git 基线：`git status --short --branch`。如果 dirty，只在用户要求或任务相关范围内新增/修改文件。
-2. 读取协议和附近 README，避免重复已有规则。
-3. 回顾本次会话，按触发条件判断是否值得沉淀。
-4. 决定归属和文件路径。
-5. 写入前明确不记录临时会话 ID、未验证猜测、工具输出流水账。
-6. 写入内容保持短、可执行、可复用。
-7. 写入后验证文件存在、格式正确，并说明路径和为什么满足沉淀条件。
+Do not copy another project's paths. First classify the repository shape, then choose a location that future maintainers will naturally inspect.
 
-## 项目级沉淀格式
+Use this placement algorithm for project-level notes:
 
-优先放在相关代码附近，例如：
+1. Name the thing that owns the knowledge: route, component, package, service, database migration, queue, deployment workflow, or external integration.
+2. Find the nearest durable directory for that owner. Prefer an existing README in that directory; otherwise create `README_<topic>.md` there.
+3. If the knowledge spans multiple owners, use the repo's documented runbook/ADR/docs area rather than picking one owner arbitrarily.
+4. If the knowledge is not tied to this repo, do not force it into project docs; write a shared skill or knowledge-base article.
+5. Replace all example nouns with current repo nouns. A copied path from another project is a bug.
+
+| Repository shape | How to place project knowledge |
+| --- | --- |
+| Single service/library | Put a focused `README_<topic>.md` beside the package/module that owns the behavior, or update an existing local README. |
+| Monorepo with `apps/`, `packages/`, `services/` | Put the note inside the owning app/package/service, not at monorepo root. |
+| Backend with domain modules | Put the note beside the handler/service/repository/migration area that owns the flow. |
+| Frontend app | Put the note beside the route/page/component state area, or in that app's docs folder. |
+| Infrastructure/deploy repo | Put the note beside the environment, chart, workflow, or runbook it affects. |
+| Shared knowledge repo | Use top-level categories such as `debugging/`, `architecture/`, `frontend/`, `llm-ops/`, or `skills/`. |
+
+Generic examples:
 
 ```text
-internal/liveroom/logic/README_shutdown.md
-src/pages/live-room/README_reconnect_flow.md
+services/payments/README_idempotency.md
+apps/admin/src/features/users/README_status-flow.md
+packages/auth/README_token-refresh.md
+deploy/k8s/README_rollout-debugging.md
+docs/runbooks/README_incident-triage.md
+skills/github-browser-create-files/SKILL.md
 ```
 
-按需使用这些章节，不要填空话：
+Bad generic examples:
+
+```text
+README.md                  # too broad unless it is a repository-wide rule
+docs/notes.md              # dumping ground
+src/README.md              # not close enough to ownership
+<old-project-path>/...     # copied from another project without matching current repo
+```
+
+Project-level note filenames should describe the durable topic, not the session:
+
+```text
+README_idempotency.md
+README_reconnect-flow.md
+README_status-lifecycle.md
+README_rollout-debugging.md
+```
+
+Avoid:
+
+```text
+README_notes.md
+README_today.md
+README_bugfix.md
+README_session-summary.md
+```
+
+## Worked Examples
+
+### Example A: Shared Knowledge Repo With Skills
+
+Situation: the target repo is a shared knowledge base with categories and an index.
+
+Do:
+
+1. Read root `README.md` to learn categories.
+2. If adding a new category such as `skills/`, update root `README.md`.
+3. Put the reusable workflow in `skills/<workflow-name>/SKILL.md`.
+4. If the repo has `build_index.py` or `INDEX.md`, rebuild/update the index.
+5. Verify the new skill appears in the index.
+
+Do not leave only the new skill file while README/INDEX still hide it.
+
+### Example B: Cross-Project Workflow
+
+Situation: the session produced a workflow that can apply to any project, such as browser-only GitHub file creation.
+
+Destination:
+
+```text
+skills/github-browser-create-files/SKILL.md
+```
+
+Minimum contents:
+
+- hard constraints: forbidden paths and required path
+- exact browser/UI sequence
+- selectors or scripts only if they are part of the reusable method
+- known failure modes
+- final verification checklist
+
+### Example C: Session Memory / User Correction
+
+Situation: user corrected agent behavior: "Do not use GitHub Upload files; use Add file -> Create new file."
+
+Decision:
+
+- If it affects only this user or machine, record as memory/final-summary.
+- If it protects future agents across projects, write a shared skill.
+- If it also changes a project-specific tool script, update that script's README or local docs.
+
+Do not bury this correction inside a long narrative. Put it in a hard-constraints section.
+
+### Example D: Project Entrypoint Controls Placement
+
+Situation: `workspace.yaml` says `apps/web`, `services/api`, and `packages/auth` are separate projects.
+
+Session discovery: a token refresh failure was traced through the web client and the shared auth package.
+
+Decision:
+
+- If the reusable fact is "auth package refresh tokens must be rotated before cache write", write under `packages/auth/README_token-refresh.md`.
+- If the reusable fact is "web app should redirect after auth package returns a refresh error", write under the owning web feature directory.
+- If the reusable fact is "the incident crosses web, API, and auth package", write a runbook under the repo's documented runbook path.
+
+Do not create `docs/notes.md` or copy a path from another repository just because it looked plausible.
+
+### Example E: Project-Specific Debugging Playbook
+
+Situation: a bug was root-caused in one service's status flow.
+
+Destination should match ownership:
+
+```text
+services/<service-name>/<domain>/README_<topic>.md
+apps/<app-name>/src/features/<feature>/README_<topic>.md
+docs/runbooks/<system>-<failure-mode>.md
+```
+
+Include the exact fields, logs, commands, and verification for that project. Do not put service-specific field names in a global skill unless they illustrate a general pattern.
+
+## Artifact Templates
+
+### Project README Note
 
 ```markdown
-# 主题
+# <Topic>
 
-## 调用链
-## 关联文件
-## 边界条件
-## 已知问题
-## 排查手法
+## When It Matters
+<Concrete trigger.>
+
+## What To Check
+- <file/command/field>
+
+## Known Failure Mode
+<Symptom -> root cause -> fix.>
+
+## Verification
+<Command or observable result.>
 ```
 
-## 知识库 Markdown 格式
-
-共享知识库文章使用 frontmatter：
+### Knowledge Base Article
 
 ```markdown
 ---
-tags: [skill, workflow]
+tags: [workflow, debugging]
 date: YYYY-MM-DD
-project: optional-project
+project: optional
 ---
 
-# 标题
+# <Title>
 
-## 现象
-## 根因
-## 修复
-## 模式抽象
+## Context
+## Root Cause / Decision
+## Reusable Workflow
+## Failure Modes
+## Verification
 ```
 
-## Skill 格式
+### Reusable Skill
 
-可复用 agent 技能放在：
+```markdown
+---
+name: lowercase-hyphen-name
+description: Use when <trigger conditions only; no workflow summary>.
+---
 
-```text
-skills/<skill-name>/SKILL.md
+# <Skill Name>
+
+## Job
+## First 3 Minutes
+## Workflow
+## Failure Modes
+## Verification
 ```
 
-`SKILL.md` 必须包含：
+If the workflow repeatedly needs exact code, add a small script under the skill folder and test it. If it is only judgment/process, keep it in `SKILL.md`.
 
-- `name`: 小写字母、数字、短横线。
-- `description`: 只写触发条件，以 `Use when...` 开头；不要把执行流程塞进 description。
-- 正文：核心约束、工作流、失败模式、验证方式。
+## Quality Bar
 
-## 不要记录
+Before publishing, run this self-review:
 
-- 一次性的 session id、临时浏览器 profile、临时端口。
-- 代码本身能直接读懂的逻辑。
-- 尚未确认的猜测。
-- `git log` / `git blame` 能直接查到的信息。
-- 已经写在项目规则文件里的稳定规则。
-- 纯流水账、长命令输出、没有复用价值的过程叙述。
+```bash
+grep -RInE 'TODO|TBD|FIXME|�' <changed-files>
+wc -w <skill-or-doc>
+```
 
-## 常见错误
+The artifact must answer:
 
-- 只写“Check for `docs/rules/learning-protocol.md`”，却没有说明协议优先级、fallback、归属规则和不记录清单。
-- 把跨项目流程写进单个业务项目，导致其他 agent 找不到。
-- 在 dirty 仓库里顺手改无关文件。
-- 直接改 `AGENTS.md` / `CLAUDE.md`，除非用户明确要求维护稳定规则。
-- 把 skill 写成故事，而不是未来 agent 可以执行的操作指南。
+- What should trigger this knowledge?
+- What exact first checks should the next agent run?
+- What decision should the next agent make?
+- What should the next agent avoid?
+- How does the next agent verify success?
+
+If it does not answer those five questions, rewrite it.
+
+## Common Mistakes
+
+- Writing only "check `docs/rules/learning-protocol.md`" without a fallback protocol.
+- Writing a session story instead of an executable workflow.
+- Hiding the most important user correction in prose.
+- Creating a skill with no trigger, no first checks, and no verification.
+- Updating a shared knowledge repo but not its `README` or `INDEX`.
+- Publishing browser/GitHub automation notes without warning about forbidden paths such as `git push`, API writes, or `Upload files`.
