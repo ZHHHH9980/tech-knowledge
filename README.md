@@ -13,6 +13,8 @@
 | `devops/` | CI/CD、容器、部署、监控 |
 | `architecture/` | 设计模式、架构决策、系统设计 |
 | `debugging/` | 调试技巧、踩坑记录、排查方法 |
+| `llm-ops/` | LLM API 运维、模型验证、中转站评估 |
+| `skills/` | 可复用 Agent 技能与跨项目工作流 |
 
 ## 文件格式
 
