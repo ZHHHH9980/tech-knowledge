@@ -22,15 +22,20 @@ If the script is not available, run these checks manually:
 ```bash
 pwd
 git status --short --branch 2>/dev/null || true
-test -f docs/rules/learning-protocol.md && sed -n '1,260p' docs/rules/learning-protocol.md
+if [ -f docs/rules/learning-protocol.md ]; then
+  sed -n '1,260p' docs/rules/learning-protocol.md
+else
+  echo "missing docs/rules/learning-protocol.md; inspect entrypoint files next"
+fi
 for f in AGENTS.md CLAUDE.md WORKSPACE.md WORKSPACE.markdown workspace.yaml workspace.yml; do test -f "$f" && grep -nEi 'learn|learning|memory|沉淀|记忆|knowledge' "$f"; done
 find . -maxdepth 3 \( -name 'README*' -o -name 'INDEX.md' \) 2>/dev/null | sort | head -80
 ```
 
 Then state which protocol is active:
 
-- **Project protocol found**: follow it as the only source of truth.
-- **No project protocol**: use the default protocol below.
+- **Explicit project protocol found**: follow it as the only source of truth.
+- **Only entrypoint hints found**: use them for repository structure and ownership; use the default protocol for learning decisions.
+- **No project protocol or hints found**: use the default protocol below.
 
 ## Default Learning Protocol
 
@@ -52,7 +57,7 @@ If no project learning protocol exists, use entrypoint files to understand the r
 
 Read in this order when present:
 
-1. `docs/rules/learning-protocol.md`: if present, stop here and follow it as the only rule source.
+1. `docs/rules/learning-protocol.md`: if present, stop here and follow it as the only rule source. Do not assume this file exists.
 2. `AGENTS.md`, `CLAUDE.md`, `WORKSPACE.md`, `WORKSPACE.markdown`, `workspace.yaml`, `workspace.yml`: scan for repository layout, ownership, docs locations, memory rules, and forbidden edits.
 3. Root `README.md` and nearby `README*`: use them to learn category names and index/update commands.
 
@@ -337,7 +342,7 @@ If it does not answer those five questions, rewrite it.
 
 ## Common Mistakes
 
-- Writing only "check `docs/rules/learning-protocol.md`" without a fallback protocol.
+- Assuming `docs/rules/learning-protocol.md` exists; if it is missing, failing to inspect entrypoint files and then use the fallback protocol.
 - Writing a session story instead of an executable workflow.
 - Hiding the most important user correction in prose.
 - Creating a skill with no trigger, no first checks, and no verification.
