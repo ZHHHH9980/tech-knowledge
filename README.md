@@ -6,6 +6,7 @@
 
 | 目录 | 领域 |
 |------|------|
+| `Agent/` | Agent 架构、工程实践、安全、生态与岗位学习路线 |
 | `concurrency/` | 并发、锁、竞态、协程 |
 | `networking/` | 网络协议、HTTP、WebSocket、RPC |
 | `database/` | 数据库设计、索引、事务、迁移 |

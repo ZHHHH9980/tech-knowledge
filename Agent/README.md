@@ -8,7 +8,7 @@
 
 | # | 文件 | 主题 | 深度 | 字数 |
 | --- | --- | --- | --- | --- |
-| 01 | [01-agent-knowledge-system.md](./01-agent-knowledge-system.md) | Agent 知识体系 | 入门 | ~2.5k |
+| 01 | [01-agent-knowledge-system.md](<./01 · Agent 知识体系与设计结构.md>) | Agent 知识体系 | 入门 | ~2.5k |
 | 02 | [02-agent-best-practices.md](./02-agent-best-practices.md) | 最佳实践（Prompt/Tool/Context/Eval） | 实战 | ~2.5k |
 | 03 | [03-claude-code-leak-analysis.md](./03-claude-code-leak-analysis.md) | Claude Code 泄漏源码分析 | 源码级 | ~3k |
 | 04 | [04-hermes-agent-internals.md](./04-hermes-agent-internals.md) | Hermes Agent 实现原理 | 源码级 | ~3k |
@@ -20,6 +20,7 @@
 | 10 | [10-agent-security-threats.md](./10-agent-security-threats.md) | Agent 安全与攻防（OWASP LLM Top 10 / Lethal Trifecta） | 中等+ | ~2k |
 | 11 | [11-coding-agent-landscape.md](./11-coding-agent-landscape.md) | Coding Agent 横向对比（12 款产品） | 中等 | ~2k |
 | 12 | [12-china-agent-ecosystem.md](./12-china-agent-ecosystem.md) | 中国 Agent 生态全景 | 中等 | ~2k |
+| 13 | [13-jd-driven-agent-engineering.md](./13-jd-driven-agent-engineering.md) | 从 JD 反推 Agent 工程师学习路线 | 实战 | ~4k |
 
 ## 推荐阅读路线
 
@@ -61,6 +62,14 @@
 06 → 07（移动章节） → 10 → 12（AutoGLM/UI-TARS 章节） → 08（CUA 章节）
 ```
 
+### 路线 F · 以 Agent 工程岗位为目标（推荐工程师）
+
+```text
+01 → 02 → 13 → 08（RAG/Eval/Obs）→ 07（Memory）→ 10（Security）→ 09（Harness）
+```
+
+先用真实 JD 判断优先级，再围绕生产证据学习，避免按框架目录重复做 Demo。
+
 ## 交叉引用地图
 
 ```mermaid
@@ -81,12 +90,16 @@ flowchart LR
     doc11 --> doc12[12 中国生态]
     doc10 --> doc02
     doc08 --> doc02
+    doc01 --> doc13[13 JD 驱动路线]
+    doc02 --> doc13
+    doc08 --> doc13
+    doc09 --> doc13
 ```
 
 ## 核心约定
 
 - **所有 .md 均已包含至少一个表格、一张图/流程、以及参考链接清单**。
-- 所有源链接访问日期 **2026-04-18**。
+- 各文档在参考来源中单独注明访问日期。
 - 本文档不适合作为商业报告，仅供个人学习参考。
 - 外文术语在第一次出现时保留英文，以便搜索。
 
@@ -106,14 +119,15 @@ flowchart LR
 | Computer-Using Agent (CUA) | 让 Agent 像人一样用电脑/手机 | 08, 06, 07 |
 | Sandbox | 执行环境隔离 | 05, 10 |
 | Blast Radius | 错误影响范围 | 02 |
+| JD Skill Matrix | 从岗位职责反推学习优先级 | 13 |
 
 ## 自审清单
 
 - [x] 每篇 >= 1 张表 + 1 张 Mermaid/流程图 + 完整参考来源
 - [x] 关键数据双源交叉（源码 + 官方公告 / 社区分析）
-- [x] 所有 URL 可点击（访问日期 2026-04-18）
+- [x] 所有 URL 可点击，并注明访问日期
 - [x] 中英术语混写，便于检索
-- [x] README 索引 + 5 条阅读路线
+- [x] README 索引 + 6 条阅读路线
 
 ## 作者备注
 
@@ -123,4 +137,4 @@ flowchart LR
 
 ---
 
-最后更新：2026-04-18
+最后更新：2026-07-18

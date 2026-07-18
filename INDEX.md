@@ -1,38 +1,82 @@
 # 技术知识库索引
 
-最后更新: 2026-07-05 11:15
-文档总数: 15
+最后更新: 2026-07-18 16:57
+文档总数: 29
 
 ## 快速检索
 
 ### 按分类
 
-#### architecture (4 篇)
+#### Agent (13 篇)
 
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md) `architecture go llm fallback resilience` *2026-06-12*
-  现象 生产环境中 LLM API 存在多种故障模式： - Provider 级故障（Vertex AI 区域性不可用） - Model 级故障（claude-opus 过载，sonnet 可用） - 不可恢复错误（context 取消、请求格式错误） 如果只做简单重试，会在不可恢复错误上浪费时间，或在 Provider 故障时不知道切换。 根因 LLM 调用的错误类型需要分层处理： 1. 不可重试...
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md) `agent career jd-analysis evaluation reliability rag` *2026-07-18*
+  > 这不是一份“Agent 技术大全”。它回答的是另一个问题：目标岗位现在反复要求什么、哪些能力必须形成工程证据、哪些热门概念暂时不值得投入。 13.1 为什么从 JD 开始 常规学习路线容易把 Function Calling、RAG、MCP、Memory、多 Agent 和各种框架依次列一遍，却没有说明优先级。岗位导向学习需要同时看三个信号： 1. 市场频率：多少份当前 JD 把它列为职责或硬...
 
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md) `architecture go orchestrator state-machine pipeline` *2026-06-12*
-  现象 AI Agent 的不同调用场景需要不同的 Tool 集合和系统提示词： - 普通对话：全量 Tool 可用 - 引用模式：只开放特定 Asset 的 Tool - 直接生成：跳过对话，直接调用 Tool 如果用 if-else 硬编码，每加一种模式就要改编排层核心逻辑。 根因 Agent 的"策略"是多维度的——它不只影响 System Prompt，还影响 Tool 定义、参数必需性、 ...
+- [02 · Agent 使用与构建的最佳实践](./Agent/02-agent-best-practices.md)
+  > 目标读者：既用现成 Agent（Claude Code / Cursor），也自己在写 Agent 的开发者。本章总结的都是从 Claude Code 泄漏源码、Anthropic 博客、OpenAI Harness Engineering、Hermes 源码里交叉验证过的做法。 2.1 心法：三句话记牢 1. 上下文是你能写出的最值钱代码。模型能力很快会变，你写的规约、工具描述、skill ...
+
+- [04 · Hermes Agent 实现原理](./Agent/04-hermes-agent-internals.md)
+  > Hermes Agent（nousresearch/hermes-agent）是 NousResearch 开源的 Python Agent 框架，在 2025-2026 出圈靠的是"不是又一个 Agent，而是真的在做代理操作系统"这个定位。这一章的价值在于：它完全开源可读，和 Claude Code（闭源但泄漏）形成完美对照，你可以在 Hermes 源码里验证第 02/03 章提到的设计决...
+
+- [05 · OpenClaw 实现原理 + 安全问题 + 沙盒](./Agent/05-openclaw-internals-security.md)
+  > OpenClaw（openclaw/openclaw）是 Steipete（PSPDFKit 创始人）发起的开源桌面 AI 助手，2025 下半年到 2026 一路涨到 360K star，成为开源 Agent 顶流。但它同时也是过去一年里被安全社区"锤"得最狠的项目 —— 因为它展示了一件事：工程能力很强的团队，用 AI 高速写代码，仍然可能得到一个"默认裸奔"的安全架构。1 5.1 项目概...
+
+- [10 · Agent 安全与攻防（威胁建模 / 注入 / OWASP / 沙盒）](./Agent/10-agent-security-threats.md)
+  > 2024–2026 是 AI 安全事件井喷的两年：从 M365 Copilot 的间接注入、ChatGPT Connectors 的数据外带、Cursor MCP 的 rule injection，到豆包手机 INJECT_EVENTS 争议，再到 OpenClaw 默认不安全的公开羞辱 —— Agent 安全不再是学术话题。这一章系统过一遍威胁模型、真实事件和防御架构。 10.1 威胁模型全...
+
+- [11 · Coding Agent 军备竞赛横向对比](./Agent/11-coding-agent-landscape.md)
+  > 2025–2026 是 "Coding Agent 军备竞赛年"：Anthropic Claude Code 从 CLI 长成 IDE + 云端三形态、Cursor 估值破百亿、OpenAI Codex CLI 回归、Microsoft Copilot Workspace 转 agentic、国内腾讯 Codebuddy / 阿里 Qoder / 字节 TRAE 同台登场。选型焦虑从"用不用 ...
+
+- [01 · Agent 知识体系与设计结构](./Agent/01 · Agent 知识体系与设计结构.md)
+  > 本章是整套文档的"地图"。读完你应该能：用统一词汇描述一个 Agent、知道主流架构谱系的来龙去脉、看见一个陌生 Agent 项目能迅速拆出它的五大件。 1.1 Agent 是什么 —— 一句话到一张图 LLM Agent 的最通俗定义：能自己决定"下一步干什么"的 LLM 驱动程序。更工程化的说法来自 Anthropic 2025 年那篇《Building Effective Agents》...
+
+- [03 · Claude Code 泄漏源码分析](./Agent/03-claude-code-leak-analysis.md)
+  > 2026-03-31，Anthropic 在发布 Claude Code v2.1.88 时误把 cli.js.map（压缩前源码映射，60MB）一起推到了 npm。社区在第一时间镜像下载并反编译 —— 51.2 万行 TypeScript、1903 个文件、4756 个模块。这是工业级 Agent 史上最大规模的"事故级"开源，比起读博客学架构，这直接把一家头部 AI Lab 最好的 Age...
+
+- [07 · Token 压缩 · 长期记忆 · 移动侧 · 多 Agent](./Agent/07-token-memory-multi-agent.md)
+  > 这四个主题其实都在回答同一个问题："怎么让 Agent 跑得更久 / 记得更多 / 动得更稳"。本章横向对比。 7.1 Token 压缩策略全景 四个流派 四种不是互斥，主流系统都是组合拳。 六个代表实现的横向表 | 方案 | 流派 | 触发 | 保留策略 | 特色 | | --- | --- | --- | --- | --- | | Claude Code 6 层 | 1+2+4 | ms...
+
+- [06 · 豆包手机 OS：原理 / 安全 / 交互](./Agent/06-doubao-phone-os.md)
+  > 2025-12-01，字节跳动联手中兴子品牌努比亚发布 努比亚 M153 豆包手机（3499 元，首批 3 万台 24 小时售罄），被广泛认为是"全球首款系统级 AI Agent 手机"。上市一周后多个国民级 App 连夜封禁它，一度成为 2025 年末中国科技圈最戏剧性的事件 —— 技术上它代表了系统级 GUI Agent 的上限，商业/合规上它暴露了移动 Agent 面临的全部挑战。123...
+
+- [09 · AI 开发模式：SDD / Harness / Vibe / Context Engineering](./Agent/09-ai-dev-paradigms.md)
+  > "我每天要和 AI 一起写代码" 的个人开发者，理应知道这条范式演进的主线。本章把 2023→2026 出现的几种主流 AI 编程范式摆在一起，说清它们解决什么、什么时候用、有什么局限。 9.1 三代工程范式演进 | 代际 | 核心动作 | 代表工具 | 优势 | 局限 | | --- | --- | --- | --- | --- | | Prompt Engineering | 调措辞、F...
+
+- [08 · AI 新概念补充（MCP / Benchmark / Obs / RAG 2.0 / CUA / UX / 推理）](./Agent/08-new-ai-concepts.md)
+  > 2024–2026 在 Agent 领域涌现出一批新概念。这一章把你在别的文档里碰到"这词什么意思" 时需要的名词解释、关键出处、一句话价值判断集中在一起。 8.1 MCP（Model Context Protocol）深潜 一句话定义 > MCP 把 "LLM 接工具" 这件事抽象成 JSON-RPC 协议，让一个 MCP Server 能被多个 Client（Claude Desktop ...
+
+- [12 · 中国 Agent 生态全景](./Agent/12-china-agent-ecosystem.md)
+  > 2024–2026 的中国 AI 厂商有一个共同动作：从"做模型" 切到"做 Agent"。因为模型差距开始收敛（Qwen/GLM/DeepSeek 已经追上），而应用层（Agent）才是最后能差异化的地方。本章盘点主要玩家、标志性产品、技术路线、以及和海外头部的对标关系。 12.1 玩家象限 12.2 标志性产品技术剖析 | 产品 | 定位 | 技术亮点 | 模型底座 | 可用性 | | -...
+
+#### architecture (3 篇)
+
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md) `architecture go llm tool-calling error-recovery` *2026-06-12*
+  现象 LLM Function Calling 在生产中有两类典型故障： 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 LLM 的结构化输出质量不是 1...
 
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md) `architecture go llm tool-calling error-recovery` *2026-06-12*
-  现象 LLM Function Calling 在生产中有两类典型故障： 1. 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 2. 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 1. LLM 的结构...
+  现象 LLM Function Calling 在生产中有两类典型故障： 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 LLM 的结构化输出质量不是 1...
 
 - [设计禁令：标识符推断与兜底策略](./architecture/design-ban-identifier-inference.md)
-  禁止从标识符推断业务属性 ID、key 名、文件名是身份标识，不是数据源。禁止用正则或字符串匹配从标识符中提取业务含义。 规则 - 业务属性（product_id、category、is_xxx 等）必须通过显式字段声明 - 如果需要关联，在数据结构里加字段；如果来源是外部调用，通过参数显式传入 - 最差的设计也应该是一个 is_product: true 的 flag，而不是靠正则匹配 ID 格...
+  禁止从标识符推断业务属性 ID、key 名、文件名是身份标识，不是数据源。禁止用正则或字符串匹配从标识符中提取业务含义。 规则 业务属性（product_id、category、is_xxx 等）必须通过显式字段声明 如果需要关联，在数据结构里加字段；如果来源是外部调用，通过参数显式传入 最差的设计也应该是一个 is_product: true 的 flag，而不是靠正则匹配 ID 格式 事故案例...
 
 #### concurrency (2 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md) `concurrency go websocket backpressure` *2026-06-12*
-  现象 WebSocket 长连接场景下，如果 LLM 流式输出速度 > 客户端消费速度（弱网、Tab 切后台）， 服务端 write buffer 无限增长，最终 OOM 或导致其他连接的推送延迟。 根因 直接在业务 goroutine 中调用 conn.WriteMessage 存在两个问题： 1. WriteMessage 有锁，多个 goroutine 并发写会阻塞 2. 没有容量控制，消息...
+  现象 WebSocket 长连接场景下，如果 LLM 流式输出速度 > 客户端消费速度（弱网、Tab 切后台）， 服务端 write buffer 无限增长，最终 OOM 或导致其他连接的推送延迟。 根因 直接在业务 goroutine 中调用 conn.WriteMessage 存在两个问题： WriteMessage 有锁，多个 goroutine 并发写会阻塞 没有容量控制，消息堆积无感知 ...
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md) `concurrency go mutex session multi-tab` *2026-06-12*
-  现象 用户在多个浏览器 Tab 打开同一个编辑器 Session，同时发送消息。 两个 Turn 并发执行时： - LLM 读到的 AssetPool 状态可能已过时 - 两个 Turn 同时写入 Transcript 导致消息乱序 - 资产生成互相覆盖 根因 Session 状态（AssetPool、Memory、Transcript）是共享可变状态。 FC Loop 内部有多次读写（读状态→调...
+  现象 用户在多个浏览器 Tab 打开同一个编辑器 Session，同时发送消息。 两个 Turn 并发执行时： LLM 读到的 AssetPool 状态可能已过时 两个 Turn 同时写入 Transcript 导致消息乱序 资产生成互相覆盖 根因 Session 状态（AssetPool、Memory、Transcript）是共享可变状态。 FC Loop 内部有多次读写（读状态→调LLM→执行...
 
-#### debugging (3 篇)
+#### debugging (5 篇)
 
 - [Redis 数据污染导致 CAS 永久失败](./debugging/redis-cas-data-pollution.md)
   场景 CAS Compare-And-Swap 乐观锁通过 Lua 脚本在 Redis 中做字符串比较： 问题 redis-cli -x SET key < file 或 echo value | redis-cli -x SET key 写入的值会带换行符。 echo 默认追加 \n，-x 从 stdin 读取时保留所有字节。 导致 CAS 比较："386" == "386\n" → 永远失败。...
+
+- [根因](./debugging/问题排查.md)
+  Redis key char:live_room:room_content:v2:catalog_version 值被污染为 "386\n"（带换行符），CAS Lua 脚本做字符串比较永远失败。来源是某次手动 echo 386 | redis-cli -x SET ...，echo 默认追加 \n。 排查过程中犯的错误 1. 无脑怀疑代码逻辑 — 假设是 retry 逻辑 bug、version...
+
+- [你正在审查另一个 AI 助手编写的计划/代码。你的任务是独立验证其正确性。](./debugging/CoreReviewer.md)
+  1. 逻辑是否正确？ 2. 是否遗漏了边界情况？ 3. 是否存在安全隐患？ 4. 是否符合既定需求？ 不要建议重构、重命名、风格调整或添加注释。只报告 bug、逻辑错误和安全问题。 在一轮回答内报告完整
 
 - [下游 API 调用的 Contract Test](./debugging/downstream-api-contract-test.md)
   问题 重构、清理代码时，容易无意中删除或遗漏传给下游服务的关键参数。普通单元测试只验证"我的逻辑对不对"，不验证"我发出去的 request 长什么样"。 案例 2026-06 soulslive-be：重构 host config 时清理了一段"看起来多余"的 cvi_config 默认注入代码，导致 CreateIVISession gRPC 请求丢失 max_duration_seconds...
@@ -70,40 +114,51 @@
 
 ### 按标签
 
-#### `architecture` (3 篇)
+#### `agent` (1 篇)
 
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md)
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md)
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
+
+#### `architecture` (2 篇)
+
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
 #### `backpressure` (1 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 
+#### `career` (1 篇)
+
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
+
 #### `concurrency` (2 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
 
-#### `error-recovery` (1 篇)
+#### `error-recovery` (2 篇)
 
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
-#### `fallback` (1 篇)
+#### `evaluation` (1 篇)
 
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md)
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
-#### `go` (5 篇)
+#### `go` (4 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md)
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md)
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
+
+#### `jd-analysis` (1 篇)
+
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
 #### `llm` (2 篇)
 
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md)
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
 #### `multi-tab` (1 篇)
@@ -114,28 +169,21 @@
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
 
-#### `orchestrator` (1 篇)
+#### `rag` (1 篇)
 
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md)
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
-#### `pipeline` (1 篇)
+#### `reliability` (1 篇)
 
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md)
-
-#### `resilience` (1 篇)
-
-- [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md)
+- [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
 #### `session` (1 篇)
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
 
-#### `state-machine` (1 篇)
+#### `tool-calling` (2 篇)
 
-- [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md)
-
-#### `tool-calling` (1 篇)
-
+- [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
 #### `websocket` (1 篇)
@@ -144,12 +192,20 @@
 
 ## 全部文档（按时间）
 
+### [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md) `agent career jd-analysis evaluation reliability rag` *2026-07-18*
+
+**分类**: Agent
+
+> 这不是一份“Agent 技术大全”。它回答的是另一个问题：目标岗位现在反复要求什么、哪些能力必须形成工程证据、哪些热门概念暂时不值得投入。 13.1 为什么从 JD 开始 常规学习路线容易把 Function Calling、RAG、MCP、Memory、多 Agent 和各种框架依次列一遍，却没有说明优先级。岗位导向学习需要同时看三个信号： 1. 市场频率：多少份当前 JD 把它列为职责或硬...
+
+---
+
 ### [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md) `concurrency go websocket backpressure` *2026-06-12*
 
 **分类**: concurrency
  | **项目**: 7verse-agent
 
-现象 WebSocket 长连接场景下，如果 LLM 流式输出速度 > 客户端消费速度（弱网、Tab 切后台）， 服务端 write buffer 无限增长，最终 OOM 或导致其他连接的推送延迟。 根因 直接在业务 goroutine 中调用 conn.WriteMessage 存在两个问题： 1. WriteMessage 有锁，多个 goroutine 并发写会阻塞 2. 没有容量控制，消息...
+现象 WebSocket 长连接场景下，如果 LLM 流式输出速度 > 客户端消费速度（弱网、Tab 切后台）， 服务端 write buffer 无限增长，最终 OOM 或导致其他连接的推送延迟。 根因 直接在业务 goroutine 中调用 conn.WriteMessage 存在两个问题： WriteMessage 有锁，多个 goroutine 并发写会阻塞 没有容量控制，消息堆积无感知 ...
 
 ---
 
@@ -158,25 +214,16 @@
 **分类**: concurrency
  | **项目**: 7verse-agent
 
-现象 用户在多个浏览器 Tab 打开同一个编辑器 Session，同时发送消息。 两个 Turn 并发执行时： - LLM 读到的 AssetPool 状态可能已过时 - 两个 Turn 同时写入 Transcript 导致消息乱序 - 资产生成互相覆盖 根因 Session 状态（AssetPool、Memory、Transcript）是共享可变状态。 FC Loop 内部有多次读写（读状态→调...
+现象 用户在多个浏览器 Tab 打开同一个编辑器 Session，同时发送消息。 两个 Turn 并发执行时： LLM 读到的 AssetPool 状态可能已过时 两个 Turn 同时写入 Transcript 导致消息乱序 资产生成互相覆盖 根因 Session 状态（AssetPool、Memory、Transcript）是共享可变状态。 FC Loop 内部有多次读写（读状态→调LLM→执行...
 
 ---
 
-### [LLM 调用的分层 Fallback 策略](./architecture/llm-layered-fallback.md) `architecture go llm fallback resilience` *2026-06-12*
+### [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md) `architecture go llm tool-calling error-recovery` *2026-06-12*
 
 **分类**: architecture
  | **项目**: 7verse-agent
 
-现象 生产环境中 LLM API 存在多种故障模式： - Provider 级故障（Vertex AI 区域性不可用） - Model 级故障（claude-opus 过载，sonnet 可用） - 不可恢复错误（context 取消、请求格式错误） 如果只做简单重试，会在不可恢复错误上浪费时间，或在 Provider 故障时不知道切换。 根因 LLM 调用的错误类型需要分层处理： 1. 不可重试...
-
----
-
-### [Preflight 分类路由 + 动态 Tool 集合](./architecture/preflight-routing-dynamic-tools.md) `architecture go orchestrator state-machine pipeline` *2026-06-12*
-
-**分类**: architecture
- | **项目**: 7verse-agent
-
-现象 AI Agent 的不同调用场景需要不同的 Tool 集合和系统提示词： - 普通对话：全量 Tool 可用 - 引用模式：只开放特定 Asset 的 Tool - 直接生成：跳过对话，直接调用 Tool 如果用 if-else 硬编码，每加一种模式就要改编排层核心逻辑。 根因 Agent 的"策略"是多维度的——它不只影响 System Prompt，还影响 Tool 定义、参数必需性、 ...
+现象 LLM Function Calling 在生产中有两类典型故障： 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 LLM 的结构化输出质量不是 1...
 
 ---
 
@@ -185,7 +232,7 @@
 **分类**: architecture
  | **项目**: 7verse-agent
 
-现象 LLM Function Calling 在生产中有两类典型故障： 1. 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 2. 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 1. LLM 的结构...
+现象 LLM Function Calling 在生产中有两类典型故障： 参数格式不稳定：同一个 Tool 的 string_array 参数，LLM 有时返回 "a","b"，有时返回 "a, b" 字符串 幻觉跳过 Tool：LLM 声称"已完成"但实际从未调用必要的 Tool（如 generate_visual） 这两类问题导致用户看到残缺的生成结果。 根因 LLM 的结构化输出质量不是 1...
 
 ---
 
@@ -213,6 +260,22 @@
 
 ---
 
+### [根因](./debugging/问题排查.md)
+
+**分类**: debugging
+
+Redis key char:live_room:room_content:v2:catalog_version 值被污染为 "386\n"（带换行符），CAS Lua 脚本做字符串比较永远失败。来源是某次手动 echo 386 | redis-cli -x SET ...，echo 默认追加 \n。 排查过程中犯的错误 1. 无脑怀疑代码逻辑 — 假设是 retry 逻辑 bug、version...
+
+---
+
+### [你正在审查另一个 AI 助手编写的计划/代码。你的任务是独立验证其正确性。](./debugging/CoreReviewer.md)
+
+**分类**: debugging
+
+1. 逻辑是否正确？ 2. 是否遗漏了边界情况？ 3. 是否存在安全隐患？ 4. 是否符合既定需求？ 不要建议重构、重命名、风格调整或添加注释。只报告 bug、逻辑错误和安全问题。 在一轮回答内报告完整
+
+---
+
 ### [下游 API 调用的 Contract Test](./debugging/downstream-api-contract-test.md)
 
 **分类**: debugging
@@ -229,11 +292,107 @@
 
 ---
 
+### [02 · Agent 使用与构建的最佳实践](./Agent/02-agent-best-practices.md)
+
+**分类**: Agent
+
+> 目标读者：既用现成 Agent（Claude Code / Cursor），也自己在写 Agent 的开发者。本章总结的都是从 Claude Code 泄漏源码、Anthropic 博客、OpenAI Harness Engineering、Hermes 源码里交叉验证过的做法。 2.1 心法：三句话记牢 1. 上下文是你能写出的最值钱代码。模型能力很快会变，你写的规约、工具描述、skill ...
+
+---
+
+### [04 · Hermes Agent 实现原理](./Agent/04-hermes-agent-internals.md)
+
+**分类**: Agent
+
+> Hermes Agent（nousresearch/hermes-agent）是 NousResearch 开源的 Python Agent 框架，在 2025-2026 出圈靠的是"不是又一个 Agent，而是真的在做代理操作系统"这个定位。这一章的价值在于：它完全开源可读，和 Claude Code（闭源但泄漏）形成完美对照，你可以在 Hermes 源码里验证第 02/03 章提到的设计决...
+
+---
+
+### [05 · OpenClaw 实现原理 + 安全问题 + 沙盒](./Agent/05-openclaw-internals-security.md)
+
+**分类**: Agent
+
+> OpenClaw（openclaw/openclaw）是 Steipete（PSPDFKit 创始人）发起的开源桌面 AI 助手，2025 下半年到 2026 一路涨到 360K star，成为开源 Agent 顶流。但它同时也是过去一年里被安全社区"锤"得最狠的项目 —— 因为它展示了一件事：工程能力很强的团队，用 AI 高速写代码，仍然可能得到一个"默认裸奔"的安全架构。1 5.1 项目概...
+
+---
+
+### [10 · Agent 安全与攻防（威胁建模 / 注入 / OWASP / 沙盒）](./Agent/10-agent-security-threats.md)
+
+**分类**: Agent
+
+> 2024–2026 是 AI 安全事件井喷的两年：从 M365 Copilot 的间接注入、ChatGPT Connectors 的数据外带、Cursor MCP 的 rule injection，到豆包手机 INJECT_EVENTS 争议，再到 OpenClaw 默认不安全的公开羞辱 —— Agent 安全不再是学术话题。这一章系统过一遍威胁模型、真实事件和防御架构。 10.1 威胁模型全...
+
+---
+
+### [11 · Coding Agent 军备竞赛横向对比](./Agent/11-coding-agent-landscape.md)
+
+**分类**: Agent
+
+> 2025–2026 是 "Coding Agent 军备竞赛年"：Anthropic Claude Code 从 CLI 长成 IDE + 云端三形态、Cursor 估值破百亿、OpenAI Codex CLI 回归、Microsoft Copilot Workspace 转 agentic、国内腾讯 Codebuddy / 阿里 Qoder / 字节 TRAE 同台登场。选型焦虑从"用不用 ...
+
+---
+
+### [01 · Agent 知识体系与设计结构](./Agent/01 · Agent 知识体系与设计结构.md)
+
+**分类**: Agent
+
+> 本章是整套文档的"地图"。读完你应该能：用统一词汇描述一个 Agent、知道主流架构谱系的来龙去脉、看见一个陌生 Agent 项目能迅速拆出它的五大件。 1.1 Agent 是什么 —— 一句话到一张图 LLM Agent 的最通俗定义：能自己决定"下一步干什么"的 LLM 驱动程序。更工程化的说法来自 Anthropic 2025 年那篇《Building Effective Agents》...
+
+---
+
+### [03 · Claude Code 泄漏源码分析](./Agent/03-claude-code-leak-analysis.md)
+
+**分类**: Agent
+
+> 2026-03-31，Anthropic 在发布 Claude Code v2.1.88 时误把 cli.js.map（压缩前源码映射，60MB）一起推到了 npm。社区在第一时间镜像下载并反编译 —— 51.2 万行 TypeScript、1903 个文件、4756 个模块。这是工业级 Agent 史上最大规模的"事故级"开源，比起读博客学架构，这直接把一家头部 AI Lab 最好的 Age...
+
+---
+
+### [07 · Token 压缩 · 长期记忆 · 移动侧 · 多 Agent](./Agent/07-token-memory-multi-agent.md)
+
+**分类**: Agent
+
+> 这四个主题其实都在回答同一个问题："怎么让 Agent 跑得更久 / 记得更多 / 动得更稳"。本章横向对比。 7.1 Token 压缩策略全景 四个流派 四种不是互斥，主流系统都是组合拳。 六个代表实现的横向表 | 方案 | 流派 | 触发 | 保留策略 | 特色 | | --- | --- | --- | --- | --- | | Claude Code 6 层 | 1+2+4 | ms...
+
+---
+
+### [06 · 豆包手机 OS：原理 / 安全 / 交互](./Agent/06-doubao-phone-os.md)
+
+**分类**: Agent
+
+> 2025-12-01，字节跳动联手中兴子品牌努比亚发布 努比亚 M153 豆包手机（3499 元，首批 3 万台 24 小时售罄），被广泛认为是"全球首款系统级 AI Agent 手机"。上市一周后多个国民级 App 连夜封禁它，一度成为 2025 年末中国科技圈最戏剧性的事件 —— 技术上它代表了系统级 GUI Agent 的上限，商业/合规上它暴露了移动 Agent 面临的全部挑战。123...
+
+---
+
+### [09 · AI 开发模式：SDD / Harness / Vibe / Context Engineering](./Agent/09-ai-dev-paradigms.md)
+
+**分类**: Agent
+
+> "我每天要和 AI 一起写代码" 的个人开发者，理应知道这条范式演进的主线。本章把 2023→2026 出现的几种主流 AI 编程范式摆在一起，说清它们解决什么、什么时候用、有什么局限。 9.1 三代工程范式演进 | 代际 | 核心动作 | 代表工具 | 优势 | 局限 | | --- | --- | --- | --- | --- | | Prompt Engineering | 调措辞、F...
+
+---
+
+### [08 · AI 新概念补充（MCP / Benchmark / Obs / RAG 2.0 / CUA / UX / 推理）](./Agent/08-new-ai-concepts.md)
+
+**分类**: Agent
+
+> 2024–2026 在 Agent 领域涌现出一批新概念。这一章把你在别的文档里碰到"这词什么意思" 时需要的名词解释、关键出处、一句话价值判断集中在一起。 8.1 MCP（Model Context Protocol）深潜 一句话定义 > MCP 把 "LLM 接工具" 这件事抽象成 JSON-RPC 协议，让一个 MCP Server 能被多个 Client（Claude Desktop ...
+
+---
+
+### [12 · 中国 Agent 生态全景](./Agent/12-china-agent-ecosystem.md)
+
+**分类**: Agent
+
+> 2024–2026 的中国 AI 厂商有一个共同动作：从"做模型" 切到"做 Agent"。因为模型差距开始收敛（Qwen/GLM/DeepSeek 已经追上），而应用层（Agent）才是最后能差异化的地方。本章盘点主要玩家、标志性产品、技术路线、以及和海外头部的对标关系。 12.1 玩家象限 12.2 标志性产品技术剖析 | 产品 | 定位 | 技术亮点 | 模型底座 | 可用性 | | -...
+
+---
+
 ### [设计禁令：标识符推断与兜底策略](./architecture/design-ban-identifier-inference.md)
 
 **分类**: architecture
 
-禁止从标识符推断业务属性 ID、key 名、文件名是身份标识，不是数据源。禁止用正则或字符串匹配从标识符中提取业务含义。 规则 - 业务属性（product_id、category、is_xxx 等）必须通过显式字段声明 - 如果需要关联，在数据结构里加字段；如果来源是外部调用，通过参数显式传入 - 最差的设计也应该是一个 is_product: true 的 flag，而不是靠正则匹配 ID 格...
+禁止从标识符推断业务属性 ID、key 名、文件名是身份标识，不是数据源。禁止用正则或字符串匹配从标识符中提取业务含义。 规则 业务属性（product_id、category、is_xxx 等）必须通过显式字段声明 如果需要关联，在数据结构里加字段；如果来源是外部调用，通过参数显式传入 最差的设计也应该是一个 is_product: true 的 flag，而不是靠正则匹配 ID 格式 事故案例...
 
 ---
 

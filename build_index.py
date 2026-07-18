@@ -2,15 +2,15 @@
 """
 技术知识库索引生成器
 
-扫描 ~/Public/tech-knowledge/ 下所有 .md 文件，提取 frontmatter 和摘要，
+扫描脚本所在知识库下所有 .md 文件，提取 frontmatter 和摘要，
 生成全局索引文件供 Claude Code agent 快速检索。
 
 用法:
     python build_index.py
 
 输出:
-    ~/Public/tech-knowledge/INDEX.md - 全局索引
-    ~/Public/tech-knowledge/INDEX.json - 机器可读索引
+    <知识库>/INDEX.md - 全局索引
+    <知识库>/INDEX.json - 机器可读索引
 """
 
 import os
@@ -33,13 +33,24 @@ class DocMetadata:
     category: str       # 所属分类（目录名）
 
 
+FRONTMATTER_RE = re.compile(
+    r'^(?:---\n(?P<yaml_body>.*?)\n---|\*\*\*(?P<star_body>tags:.*?)\n\*\*\*)\n',
+    re.DOTALL,
+)
+
+
+def strip_frontmatter(content: str) -> str:
+    """移除仓库中已有的两种 frontmatter 格式。"""
+    return FRONTMATTER_RE.sub('', content, count=1)
+
+
 def extract_frontmatter(content: str) -> Dict:
     """提取 YAML frontmatter"""
-    match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
+    match = FRONTMATTER_RE.match(content)
     if not match:
         return {}
 
-    fm_text = match.group(1)
+    fm_text = match.group('yaml_body') or match.group('star_body')
     metadata = {}
 
     # 简单解析 YAML（不依赖 pyyaml）
@@ -61,23 +72,28 @@ def extract_frontmatter(content: str) -> Dict:
 
 def extract_title(content: str) -> str:
     """提取第一个 # 标题"""
-    # 跳过 frontmatter
-    content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
+    content = strip_frontmatter(content)
 
     match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
     if match:
         return match.group(1).strip()
+
+    for line in content.splitlines():
+        if line.strip():
+            return line.strip()
 
     return "Untitled"
 
 
 def extract_summary(content: str, max_length: int = 200) -> str:
     """提取摘要（去掉 frontmatter 和标题后的前 N 字）"""
-    # 去掉 frontmatter
-    content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
+    content = strip_frontmatter(content).lstrip('\n')
 
-    # 去掉第一个标题
-    content = re.sub(r'^#\s+.+\n', '', content, flags=re.MULTILINE, count=1)
+    # 去掉 extract_title 实际识别到的首行标题，兼容无 # 的旧笔记。
+    first_line, _, remaining = content.partition('\n')
+    first_line_title = re.sub(r'^#\s+', '', first_line).strip()
+    if first_line_title == extract_title(content):
+        content = remaining
 
     # 去掉代码块
     content = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
@@ -100,7 +116,7 @@ def scan_knowledge_base(base_path: Path) -> List[DocMetadata]:
 
     for md_file in base_path.rglob("*.md"):
         # 跳过 README 和 INDEX
-        if md_file.name in ["README.md", "INDEX.md"]:
+        if md_file.name in ["README.md", "INDEX.md", "CLAUDE.md"]:
             continue
 
         # 读取内容
@@ -232,7 +248,7 @@ def generate_json_index(docs: List[DocMetadata], output_path: Path):
 
 
 def main():
-    base_path = Path.home() / "Public" / "tech-knowledge"
+    base_path = Path(__file__).resolve().parent
 
     if not base_path.exists():
         print(f"❌ 知识库目录不存在: {base_path}")
@@ -248,8 +264,8 @@ def main():
 
     print("\n✅ 索引生成完成")
     print(f"\n💡 Agent 可以通过以下方式使用:")
-    print(f"   1. 阅读 ~/Public/tech-knowledge/INDEX.md 浏览全部文档")
-    print(f"   2. 用 grep 搜索: grep -i 'redis' ~/Public/tech-knowledge/INDEX.md")
+    print(f"   1. 阅读 {base_path / 'INDEX.md'} 浏览全部文档")
+    print(f"   2. 用 grep 搜索: grep -i 'redis' {base_path / 'INDEX.md'}")
     print(f"   3. 解析 INDEX.json 做精确匹配")
 
 
