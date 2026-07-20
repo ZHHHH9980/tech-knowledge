@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Structure Review"
-  short_description: "Review code structure and orchestration clarity"
-  default_prompt: "Use $code-structure-review to review this diff for file size, single responsibility, boundary extraction, and commented orchestration steps."
+  short_description: "审查业务规则唯一归属、抽象内聚、读写一致性与主流程结构"
+  default_prompt: "使用 $code-structure-review 审查这个 diff 的规则唯一归属、状态所有权、抽象净价值、读写一致性和主流程结构。"
