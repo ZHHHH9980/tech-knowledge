@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent 行为评测与优化"
+  short_description: "用隔离 Eval 复盘轨迹并闭环优化 Agent 行为"
+  default_prompt: "使用 $improving-agent-behavior 评测这段 Agent 轨迹，与我讨论优化方案，并只实施获批改动。"
