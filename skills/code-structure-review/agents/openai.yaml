@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Structure Review"
+  short_description: "Review code structure and orchestration clarity"
+  default_prompt: "Use $code-structure-review to review this diff for file size, single responsibility, boundary extraction, and commented orchestration steps."
