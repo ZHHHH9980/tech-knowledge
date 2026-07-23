@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Orchestrator"
+  short_description: "逐个推进 MR，在关键操作前确认，发布验证后安全清理 Feature worktree"
+  default_prompt: "使用 $release-orchestrator 按依赖顺序推进这个 Feature 的发布，在冲突和关键操作前暂停，完成发布验证后安全清理当前 Feature 的本地 worktree。"
