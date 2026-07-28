@@ -1,0 +1,4 @@
+interface:
+  display_name: "技术方案交互与数据评审"
+  short_description: "结合 Figma 审查交互契约、分页、SQL、表关系、索引与容量风险"
+  default_prompt: "使用 $tech-design-data-review 结合 Figma 评审这份技术方案的交互契约、数据访问与数据库设计。"
