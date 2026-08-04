@@ -1,0 +1,4 @@
+interface:
+  display_name: "技术方案多维评审"
+  short_description: "核查基线、数据模型与迁移，并检查方案是否清晰易懂"
+  default_prompt: "使用 $tech-design-review 评审这份技术方案的基线、数据模型与迁移及表述可读性。"
