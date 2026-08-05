@@ -1,4 +1,4 @@
 interface:
-  display_name: "技术方案多维评审"
-  short_description: "核查基线、数据模型与迁移，并检查方案是否清晰易懂"
-  default_prompt: "使用 $tech-design-review 评审这份技术方案的基线、数据模型与迁移及表述可读性。"
+  display_name: "技术方案交互与数据评审"
+  short_description: "审查交互契约、接口执行模式、分页、SQL、表关系、索引与容量风险"
+  default_prompt: "使用 $tech-design-data-review 评审这份技术方案的交互契约、接口执行模式、请求预算、数据访问与数据库设计。"
