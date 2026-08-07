@@ -118,6 +118,35 @@ HTML 与 SSR 不能拆成两个各自重新构建的发布流程。即使两个 
 HTTP 缓存分发版本图
 ```
 
+### 6.1 最佳实践：源站声明、代理透传、CDN 执行
+
+成熟的生产设计不会让对象存储、Nginx 和 CDN 分别维护一套缓存规则。唯一真相源应是版本库中的发布策略；发布流水线根据产物类型写入对象 metadata，对象存储按 metadata 返回标准 HTTP 响应，后续代理层不再重复决策。
+
+| 产物类型 | 建议的 `Cache-Control` |
+| --- | --- |
+| 带内容 hash 的 JS、CSS、图片 | `public, max-age=31536000, immutable` |
+| 版本化且永不覆盖的 manifest | `public, max-age=31536000, immutable` |
+| 固定 URL 的 HTML、当前版本 manifest | `no-cache, must-revalidate` |
+| 不允许任何中间层存储的响应 | `no-store` |
+
+在 GCP 上，Cloud CDN 不是 GLB 前后的独立跳点，而是 GLB/GFE 的边缘缓存能力。缓存未命中时，一条完整的请求与响应链路是：
+
+```text
+请求：浏览器 → GLB/GFE（Cloud CDN 查缓存）→ Nginx/应用 → 对象存储
+响应：对象存储 → Nginx 透传 → GLB/GFE（Cloud CDN 执行缓存）→ 浏览器
+```
+
+若 Nginx 只是代理静态对象，没有鉴权、签名、路由或内容转换职责，更简单的做法是通过 GLB URL Map 直接分流：
+
+```text
+/assets/*       → GLB/GFE + Cloud CDN → GCS Backend Bucket
+/api/*、SSR     → GLB/GFE → Backend Service → Nginx/应用
+```
+
+保留 Nginx 时，它不应再配置统一的 `add_header Cache-Control ... always`、`expires` 或 `proxy_hide_header Cache-Control`。Cloud CDN 应使用 `USE_ORIGIN_HEADERS`，并将 minimum TTL 设为 `0`；负缓存关闭或只保留秒级 TTL，避免短暂 404 被长期放大。
+
+404、5xx 是边界例外：不存在的对象没有可写入的对象 metadata，因此由产生错误的对象存储、应用或代理明确返回错误缓存头，CDN 只保留防止回源风暴的保护性边界。
+
 ## 7. 失败与恢复边界
 
 | 失败位置 | 正确结果 |
@@ -182,4 +211,7 @@ gcloud storage objects describe \
 
 - [Vite：Backend Integration](https://vite.dev/guide/backend-integration)
 - [MDN：Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control)
+- [Google Cloud CDN：Cloud CDN overview](https://cloud.google.com/cdn/docs/overview)
+- [Google Cloud CDN：Caching overview](https://cloud.google.com/cdn/docs/caching)
+- [Google Cloud CDN：Set up a backend bucket](https://cloud.google.com/cdn/docs/setting-up-cdn-with-bucket)
 - [Google Cloud Storage：Soft delete](https://cloud.google.com/storage/docs/soft-delete)
