@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Web Publish"
+  short_description: "仅通过 GitHub 网页安全编辑、上传、核对差异并提交内容"
+  default_prompt: "使用 $github-web-publish，通过当前 Computer Use 能力操作已连接且已登录的 Chrome，在 GitHub 网页上传或编辑内容、核对差异并提交；禁止使用 git push、GitHub API、CLI 或连接器写入。"
