@@ -1,0 +1,7 @@
+interface:
+  display_name: "Frontend CR"
+  short_description: "Frontend review and file-boundary guardrails"
+  default_prompt: "Use $frontend-cr to review this frontend change for readability, Tailwind density, file size, and component boundaries."
+
+policy:
+  allow_implicit_invocation: true
