@@ -261,7 +261,7 @@ AI orchestrator (e.g., OpenClaw). In spawned sessions:
 
 进入工程实施评审前，先确认：
 
-- [ ] 已过 `tech-design-review`（数据模型 + 表述可读性），CRITICAL 项已解决；未完成时先停止本评审。
+- [ ] 已过 `tech-design-data-review`（数据模型 + 表述可读性），CRITICAL 项已解决；未完成时先停止本评审。
 
 ## Voice
 

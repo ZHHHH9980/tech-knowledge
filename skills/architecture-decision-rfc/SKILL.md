@@ -65,4 +65,4 @@ description: 编写架构评估与技术选型文档（ADR/RFC），用于拆仓
 
 ## 完成后
 
-方案写完不等于可实施。交给 `tech-design-review` 做技术方案评审（数据模型 + 表述可读性），再交给 `plan-eng-review` 做实施前工程评审。用户确认后才动代码。
+方案写完不等于可实施。交给 `tech-design-data-review` 做技术方案评审（数据模型 + 表述可读性），再交给 `plan-eng-review` 做实施前工程评审。用户确认后才动代码。

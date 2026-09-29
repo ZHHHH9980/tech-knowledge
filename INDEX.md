@@ -1,7 +1,7 @@
 # 技术知识库索引
 
-最后更新: 2026-07-18 16:57
-文档总数: 29
+最后更新: 2026-09-29 20:07
+文档总数: 49
 
 ## 快速检索
 
@@ -67,6 +67,11 @@
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md) `concurrency go mutex session multi-tab` *2026-06-12*
   现象 用户在多个浏览器 Tab 打开同一个编辑器 Session，同时发送消息。 两个 Turn 并发执行时： LLM 读到的 AssetPool 状态可能已过时 两个 Turn 同时写入 Transcript 导致消息乱序 资产生成互相覆盖 根因 Session 状态（AssetPool、Memory、Transcript）是共享可变状态。 FC Loop 内部有多次读写（读状态→调LLM→执行...
 
+#### database (1 篇)
+
+- [GORM 链式 Where 里的 OR 组缺外层括号：一条 UPDATE 污染全表](./database/gorm-where-or-group-missing-parens.md)
+  症状 - 一条本应只更新 1 行的 UPDATE，实际更新了几百行（本例 318 行）。 - 受影响的行有共同特征：它们都满足 OR 分支的条件，而与目标主键无关。 - 上游看起来"没成功"：调用方按 RowsAffected != 1 判定失败并走了回滚/重排分支，但脏数据已经写进事务并提交。故障表现成"任务未完成"，掩盖了"数据已污染"。 - 单元测试全绿。 根因 GORM 的链式 Where...
+
 #### debugging (5 篇)
 
 - [Redis 数据污染导致 CAS 永久失败](./debugging/redis-cas-data-pollution.md)
@@ -84,12 +89,26 @@
 - [骨架屏 CLS：`min-h-full` + `justify-end` 在动态高度容器中引发布局抖动](./debugging/skeleton-cls-min-h-full-justify-end.md)
   现象 聊天页面骨架屏使用 min-h-full flex-col justify-end 让占位气泡贴底显示。页面加载时骨架屏出现后往上跳 8-12px。 根因 骨架屏所在的滚动容器（overflow-y-auto flex-1）高度由外层 flex 布局动态分配。当组件树中任何兄弟/祖先元素触发 cascading setState（比如初始化 effect 重置一批状态），会导致容器 offs...
 
+#### devops (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md) `frontend asset-delivery caching cdn object-storage reverse-proxy devops troubleshooting` *2026-08-02*
+  定位 前端资源问题经常表现为“每一层看起来都正常，但用户仍拿到旧内容或错误内容”： - 数据接口已经返回新数据，公网 HTML 或固定站点文件仍是旧版本。 - 对象存储的正文和 metadata 已更新，公网响应头仍保留旧缓存策略。 - CDN 缓存清理已经成功，下一次回源后又缓存了错误版本。 - 动态渲染服务已经上线，请求却仍落到静态站点。 - 远程构建任务已创建，CI 因无法读取日志而显示失败...
+
 #### engineering (1 篇)
 
 - [LinkedIn Code Review 最佳实践](./engineering/linkedin-code-review-practices.md)
   来源 - URL: https://thenewstack.io/linkedin-code-review/ - 作者: Szczepan Faber LinkedIn Development Tools Tech Lead - 时间: 2017-09 - 背景: LinkedIn 完成 100 万次 code review 后的经验总结；2011 年起强制全员 CR 核心观点 组织层面收益 1....
 
-#### frontend (1 篇)
+#### frontend (4 篇)
+
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md) `frontend manifest deployment ssr caching gcs release` *2026-08-07*
+  1. 问题不只是“文件有没有上传” 现代前端构建会生成带内容 hash 的 JavaScript、CSS、图片和字体。HTML 或 SSR 服务端产物不会在运行时自动寻找“最新资源”，而是在构建时绑定某一组确定的 hash URL。 因此，一个可工作的前端版本不是若干独立文件，而是一个完整 release： 只要其中一部分来自另一轮构建，就会出现版本偏斜：HTML 可以正常返回，首屏 SSR 也可...
+
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md) `frontend nginx http caching cache-control cdn debugging` *2026-08-07*
+  1. 典型现象 一次前端发布短暂删除了带 hash 的资源，浏览器请求资源时收到 404。资源随后重新上传，直接请求已经返回 200，但部分用户仍持续看到： DevTools 可能显示 from disk cache。这时源站已经恢复，用户仍失败的原因是浏览器缓存了先前的 404。 问题不在“浏览器为什么缓存”，而在出口错误地把 404 标记成了可长期公开缓存的响应，例如： must-revali...
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md) `nextjs ssr rsc hydration frontend deployment caching` *2026-08-03*
+  1. 定位 Next.js 已经把 React SSR 的底层调用闭环起来。日常使用 App Router 时，工程师通常不需要自己调用 renderToString、renderToPipeableStream 或 hydrateRoot。 但框架代劳不等于生产边界消失。上线后仍然要回答四个问题： 1. 首次请求由谁生成 HTML？ 2. 哪些代码只在服务端运行，哪些代码会进入浏览器？ 3. 构...
 
 - [useLayoutEffect 用于 DOM 位置操作](./frontend/useLayoutEffect-scroll-positioning.md)
   问题 React 中渲染列表后需要滚动到底部（聊天、日志、feed），用 useEffect 执行 el.scrollTop = el.scrollHeight 会导致一帧闪烁：用户先看到列表顶部，再跳到底部。 根因 React 渲染周期： useEffect 在 paint 之后执行。如果列表很长（50+ 条消息，渲染 > 100ms），中间那帧用户看到的是 scrollTop=0（顶部），造成...
@@ -99,18 +118,63 @@
 - [LLM API 中转站验证方案](./llm-ops/verify-api-proxy.md)
   问题背景 第三方 LLM API 中转站（代理服务）可能存在的问题： - 声称是 GPT-4/Claude Opus，实际调用更便宜的小模型 - Token 计数造假，多收费 - 缓存旧响应，不是实时调用 - 记录用户 prompts（隐私风险） 验证维度矩阵 | 维度 | 检测目标 | 成本 | 可靠性 | |------|---------|------|--------| | 模型自我认知 ...
 
-#### root (1 篇)
+#### root (4 篇)
+
+- [Optional Tool and Environment Configuration](./TOOLS.en.md)
+  简体中文./TOOLS.md | English Optional Tool and Environment Configuration This file contains rules tied to specific accounts, CLIs, directory layouts, or local toolchains. CLAUDE.en.md does not import it a...
 
 - [技术知识库索引系统](./INDEX_GUIDE.md)
   索引文件 - INDEX.md - 人类可读的 Markdown 索引，包含分类、标签、摘要 - INDEX.json - 机器可读的 JSON 索引，包含完整元数据 - build_index.py - 索引生成脚本 - update_index.sh - 自动更新钩子脚本 Agent 使用指南 快速查找文档 典型场景 场景 1: 用户问"有没有类似的经验" 场景 2: 排查问题前搜索已知案例 ...
 
-#### skills (2 篇)
+- [Hard Rules](./CLAUDE.en.md)
+  简体中文./CLAUDE.md | English > Optional tool- and environment-specific rules live in TOOLS.en.md./TOOLS.en.md. The core rules do not import tool configuration automatically; reference it explicitly only ...
 
-- [Learn Session Knowledge](./skills/learn-session-knowledge/SKILL.md)
-  Job Turn a finished or interrupted session into reusable knowledge. Do not write a diary. Produce an artifact that another agent can use without seeing the original chat. First 3 Minutes If this skill...
+- [可选工具与环境配置](./TOOLS.md)
+  简体中文 | English./TOOLS.en.md 可选工具与环境配置 本文件收纳依赖具体账号、CLI、目录结构或本地工具链的规则，不由 CLAUDE.md 自动导入。仅在环境匹配时选择所需章节，或在个人配置中显式添加 @TOOLS.md。 GitLab 与 glab - GitLab 访问使用 glab CLI，不使用无法通过组织登录流程的通用网页抓取工具。 - 查看 MR diff：gla...
 
-- [GitHub Browser Create Files](./skills/github-browser-create-files/SKILL.md)
-  Hard Constraints - Do not use git push, GitHub write APIs, or direct repository upload controls. - Do not click Upload files. - Do not use Playwright setInputFiles or inputtype="file". - Use GitHub we...
+#### skills (14 篇)
+
+- [Agent 行为评测与优化](./skills/improving-agent-behavior/SKILL.md)
+  核心原则 执行 Execute → Evaluate → Optimize → Re-evaluate。历史轨迹已有 Execute 产物时，从 Evaluate 开始。 把评测与修改分开：先用证据测评并与用户讨论，再获得针对精确修改清单的确认，最后修改和复测。 <HARD-GATE> 在完成 Eval、讨论方案并获得用户对精确修改清单的明确确认前，不得修改任何规则、Skill、测试、业务代码或外...
+
+- [BE 后端评审](./skills/backend-review/SKILL.md)
+  本技能整理已有后端结构、Go 可读性、消费点覆盖与 ID 精度规则。默认只读，不因评审而修改代码或发布；按用户给定的范围选用模块，不把所有专项强制执行一遍。 选择已有检查模块 | 用户任务或改动证据 | 读取材料 | 交付 | |---|---|---| | 结构、职责、规则分叉、状态所有权、隐藏副作用或配置发布依赖 | 结构评审references/structure.md | 结构发现、配置发...
+
+- [GitHub Web Publish](./skills/github-web-publish/SKILL.md)
+  通过当前可用的 Computer Use 能力操作已连接且已登录的 Chrome，在 GitHub 网页中编辑、创建或上传仓库文件，并完成网页提交与结果验证。 硬性边界 - 只使用 GitHub 网页提供的 Edit、Create new file、Upload files 和 Commit changes 等界面完成远程写入。 - 使用当前环境提供的 Computer Use 接口并遵守它当轮返...
+
+- [FE 前端评审](./skills/frontend-review/SKILL.md)
+  保持前端变更可读、可评审，并按职责划分。优先使用清晰的领域名称，避免在大组件中堆积内联实现。默认只读；用户明确要求实现或重构时，使用文末已有的实现清单。 评审前定位 评审或编辑前先确认： - 框架和项目现有约定。 - 本次涉及的文件和行数。 - 改动属于页面级功能、复用 UI、数据转换、样式调整还是有状态行为。 - 检查实际调用关系，确定新增或抽取的组件、hook 所属的最小范围，并统计该范围内已...
+
+- [《[项目名] 架构评估》](./skills/architecture-decision-rfc/template.md)
+  0. 背景与范围 - 背景： - 当前痛点： - 目标： - 非目标： - 关键约束（时间/人力/兼容/成本）： - PRD： - Figma 文件及相关页面/节点： - 现有实现证据： - Figma 适用性（已读取/证据不足/不适用及理由）： - PRD、Figma、Tech Design、现有实现的冲突与决策： 1. 问题陈述 1.1 架构范式差异 - 当前范式： - 新需求范式： - 冲突...
+
+- [架构评估自检清单](./skills/architecture-decision-rfc/checklist.md)
+  输入证据与交互 - 是否判断本方案是否影响用户可见页面或交互 - 适用时是否实际读取相关 Figma 页面、节点、原型连线和注释，而非只看截图 - 不适用时是否记录“Figma 不适用”及理由 - Figma 缺失或无法访问时，是否将方案完整性标记为证据不足 - 是否覆盖主路径、loading、空态、成功、失败、重试、取消和重复操作 - 是否将关键交互映射到接口、字段、状态所有者、后端副作用及幂等...
+
+- [架构评估与决策](./skills/architecture-decision-rfc/SKILL.md)
+  用于把“想法讨论”收敛为“可执行方案”。 使用方式 1. 收集输入：背景、现状、目标、约束、非目标、时间窗口、PRD、Figma 和现有实现。 2. 判断是否涉及用户可见页面或交互： - 适用时实际读取相关 Figma 页面、节点、原型连线和注释，提取状态、动作、异常分支和数据需求。 - 无法找到或访问 Figma 时，将其列为阻塞方案完整性的待确认项，不凭经验补全。 - 纯基础设施或无 UI 变...
+
+- [zsh-compatible: use find instead of glob to avoid NOMATCH error](./skills/plan-eng-review/SKILL.md)
+  <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly --> <!-- Regenerate: bun run gen:skill-docs --> Preamble run first If PROACTIVE is "false", do not proactively suggest gstack skills AND d...
+
+- [Release Orchestrator](./skills/release-orchestrator/SKILL.md)
+  把已经开发完成的 Feature 安全地逐步发布。先在内部建立完整依赖图，再一次只交付一个当前可执行的 MR；前序发布和验证没有完成时，不推进后续 MR。 入口边界 把以下内容视为已在开发阶段完成： - 代码 review、测试和必要修复。 - 配置与发布依赖的完整性审查。 - Feature 的开发依赖或发布依赖文档维护。 - 最终 feat 分支作为功能代码真相源。 不要调用其他 code r...
+
+- [技术方案交互、接口与数据评审](./skills/tech-design-data-review/SKILL.md)
+  基于 Figma 交互、实际接口、请求预算、耗时证据、调用路径、SQL、DDL、索引和容量证据给出可执行的评审结论。不要只复述 Tech Design，也不要把个人偏好包装成 Finding。 评审边界 - 默认只读评审；除非用户明确要求，否则不要修改代码、文档、数据库或远端状态。 - 优先检查用户给出的 PRD、Figma、Tech Design、MR/PR 和代码；缺少材料时再搜索关联实现。 ...
+
+- [Go 代码可读性](./skills/backend-review/references/go-readability.md)
+  执行只读审核。除非用户明确要求修改，否则不要编辑被审代码。 审核边界 只报告本次变更新增或明显加剧的问题。阅读足够的调用者、类型定义和测试来理解变更，但不要把审核扩张为历史代码清理。 本层只回答“代码是否容易被准确理解和安全修改”。以下内容只记录为待进入其他审核层的风险，不在没有证据时下结论： - 业务逻辑是否正确。 - 是否存在数据竞争、死锁或内存模型问题。 - 性能、容量和资源消耗是否满足目标...
+
+- [代码结构评审](./skills/backend-review/references/structure.md)
+  实现完成后的结构体检，只读。除非用户明确要求，不改被审代码。 关注结构和可维护性：规则有没有分叉、状态归谁管、抽象值不值、体量是否失控、配置有没有漏登记。 不猎 bug（那是 code review / 安全评审的活），不追覆盖率数字，不提格式化偏好。 审查重构时同时比较变更前后，核对规则实现数量、状态所有者、调用跳转、可变状态入口和契约是否收敛。用户要求判断重构目标时可以说明仍存缺口，但不将未加...
+
+- [消费点覆盖与标识符完整性](./skills/backend-review/references/dependency-and-identifiers.md)
+  对被多处消费的依赖做覆盖面体检，对跨边界标识符做精度完整性检查。只读；除非用户明确要求，不改被审代码。 根据 diff 回答适用的问题： - 依赖覆盖：这次改造是否覆盖了该依赖的全部消费点；没覆盖的是否是有意保留。 - 标识符完整性：标识符从生产到消费是否保持逐位一致，是否可能因浮点数或隐式类型转换映射到另一主体。 本模块不查结构好坏（结构由同包 structure.md 覆盖），不做与上述两类风...
+
+- [Agent 行为 Eval 量表](./skills/improving-agent-behavior/references/evaluation-rubric.md)
+  使用边界 只评价样本中可见的消息、工具操作和产物。先还原当时 Agent 能知道什么，再判断行为；不要依据隐藏推理、后来补充的信息或最终结果反推当时必然犯错。 样本不完整时标记未知。除非表达方式造成误解、延迟或范围漂移，否则不评价个人风格。 评分 对每个维度给出 0～4 分并引用证据： - 4：行为完整可靠，没有实质缺口。 - 3：总体正确，存在轻微但不影响主目标的缺口。 - 2：部分正确，但有明...
 
 ### 按标签
 
@@ -123,18 +187,51 @@
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
+#### `asset-delivery` (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+
 #### `backpressure` (1 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
+
+#### `cache-control` (1 篇)
+
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
+#### `caching` (4 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
 
 #### `career` (1 篇)
 
 - [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
+#### `cdn` (2 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
 #### `concurrency` (2 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
+
+#### `debugging` (1 篇)
+
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
+#### `deployment` (2 篇)
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
+
+#### `devops` (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
 
 #### `error-recovery` (2 篇)
 
@@ -145,12 +242,31 @@
 
 - [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
+#### `frontend` (4 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
+#### `gcs` (1 篇)
+
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
+
 #### `go` (4 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
+
+#### `http` (1 篇)
+
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
+#### `hydration` (1 篇)
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
 
 #### `jd-analysis` (1 篇)
 
@@ -161,6 +277,10 @@
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
+#### `manifest` (1 篇)
+
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
+
 #### `multi-tab` (1 篇)
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
@@ -169,28 +289,93 @@
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
 
+#### `nextjs` (1 篇)
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+
+#### `nginx` (1 篇)
+
+- [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md)
+
+#### `object-storage` (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+
 #### `rag` (1 篇)
 
 - [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
+
+#### `release` (1 篇)
+
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
 
 #### `reliability` (1 篇)
 
 - [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md)
 
+#### `reverse-proxy` (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+
+#### `rsc` (1 篇)
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+
 #### `session` (1 篇)
 
 - [Turn 锁 + PreLock 钩子解决多 Tab 竞态](./concurrency/turn-lock-prelock-multi-tab.md)
+
+#### `ssr` (2 篇)
+
+- [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md)
+- [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md)
 
 #### `tool-calling` (2 篇)
 
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-layered-fallback.md)
 - [LLM Tool 参数容错 + FC Loop 自动恢复](./architecture/llm-tool-calling-fault-tolerance.md)
 
+#### `troubleshooting` (1 篇)
+
+- [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md)
+
 #### `websocket` (1 篇)
 
 - [WebSocket Channel 队列 + WritePump 背压处理](./concurrency/websocket-channel-backpressure.md)
 
 ## 全部文档（按时间）
+
+### [Manifest 驱动的前端静态资源与 SSR 发布](./frontend/manifest-driven-frontend-release.md) `frontend manifest deployment ssr caching gcs release` *2026-08-07*
+
+**分类**: frontend
+
+1. 问题不只是“文件有没有上传” 现代前端构建会生成带内容 hash 的 JavaScript、CSS、图片和字体。HTML 或 SSR 服务端产物不会在运行时自动寻找“最新资源”，而是在构建时绑定某一组确定的 hash URL。 因此，一个可工作的前端版本不是若干独立文件，而是一个完整 release： 只要其中一部分来自另一轮构建，就会出现版本偏斜：HTML 可以正常返回，首屏 SSR 也可...
+
+---
+
+### [404 负缓存：为什么静态资源恢复后用户仍然打不开页面](./frontend/http-negative-caching-nginx.md) `frontend nginx http caching cache-control cdn debugging` *2026-08-07*
+
+**分类**: frontend
+
+1. 典型现象 一次前端发布短暂删除了带 hash 的资源，浏览器请求资源时收到 404。资源随后重新上传，直接请求已经返回 200，但部分用户仍持续看到： DevTools 可能显示 from disk cache。这时源站已经恢复，用户仍失败的原因是浏览器缓存了先前的 404。 问题不在“浏览器为什么缓存”，而在出口错误地把 404 标记成了可长期公开缓存的响应，例如： must-revali...
+
+---
+
+### [Next.js SSR 生产运行模型与交付边界](./frontend/nextjs-ssr-production-model.md) `nextjs ssr rsc hydration frontend deployment caching` *2026-08-03*
+
+**分类**: frontend
+
+1. 定位 Next.js 已经把 React SSR 的底层调用闭环起来。日常使用 App Router 时，工程师通常不需要自己调用 renderToString、renderToPipeableStream 或 hydrateRoot。 但框架代劳不等于生产边界消失。上线后仍然要回答四个问题： 1. 首次请求由谁生成 HTML？ 2. 哪些代码只在服务端运行，哪些代码会进入浏览器？ 3. 构...
+
+---
+
+### [前端资源交付链路与多层缓存排障](./devops/frontend-resource-delivery-troubleshooting.md) `frontend asset-delivery caching cdn object-storage reverse-proxy devops troubleshooting` *2026-08-02*
+
+**分类**: devops
+
+定位 前端资源问题经常表现为“每一层看起来都正常，但用户仍拿到旧内容或错误内容”： - 数据接口已经返回新数据，公网 HTML 或固定站点文件仍是旧版本。 - 对象存储的正文和 metadata 已更新，公网响应头仍保留旧缓存策略。 - CDN 缓存清理已经成功，下一次回源后又缓存了错误版本。 - 动态渲染服务已经上线，请求却仍落到静态站点。 - 远程构建任务已创建，CI 因无法读取日志而显示失败...
+
+---
 
 ### [13 · 从 JD 反推 Agent 工程师学习路线](./Agent/13-jd-driven-agent-engineering.md) `agent career jd-analysis evaluation reliability rag` *2026-07-18*
 
@@ -236,11 +421,43 @@
 
 ---
 
+### [Optional Tool and Environment Configuration](./TOOLS.en.md)
+
+**分类**: root
+
+简体中文./TOOLS.md | English Optional Tool and Environment Configuration This file contains rules tied to specific accounts, CLIs, directory layouts, or local toolchains. CLAUDE.en.md does not import it a...
+
+---
+
 ### [技术知识库索引系统](./INDEX_GUIDE.md)
 
 **分类**: root
 
 索引文件 - INDEX.md - 人类可读的 Markdown 索引，包含分类、标签、摘要 - INDEX.json - 机器可读的 JSON 索引，包含完整元数据 - build_index.py - 索引生成脚本 - update_index.sh - 自动更新钩子脚本 Agent 使用指南 快速查找文档 典型场景 场景 1: 用户问"有没有类似的经验" 场景 2: 排查问题前搜索已知案例 ...
+
+---
+
+### [Hard Rules](./CLAUDE.en.md)
+
+**分类**: root
+
+简体中文./CLAUDE.md | English > Optional tool- and environment-specific rules live in TOOLS.en.md./TOOLS.en.md. The core rules do not import tool configuration automatically; reference it explicitly only ...
+
+---
+
+### [可选工具与环境配置](./TOOLS.md)
+
+**分类**: root
+
+简体中文 | English./TOOLS.en.md 可选工具与环境配置 本文件收纳依赖具体账号、CLI、目录结构或本地工具链的规则，不由 CLAUDE.md 自动导入。仅在环境匹配时选择所需章节，或在个人配置中显式添加 @TOOLS.md。 GitLab 与 glab - GitLab 访问使用 glab CLI，不使用无法通过组织登录流程的通用网页抓取工具。 - 查看 MR diff：gla...
+
+---
+
+### [GORM 链式 Where 里的 OR 组缺外层括号：一条 UPDATE 污染全表](./database/gorm-where-or-group-missing-parens.md)
+
+**分类**: database
+
+症状 - 一条本应只更新 1 行的 UPDATE，实际更新了几百行（本例 318 行）。 - 受影响的行有共同特征：它们都满足 OR 分支的条件，而与目标主键无关。 - 上游看起来"没成功"：调用方按 RowsAffected != 1 判定失败并走了回滚/重排分支，但脏数据已经写进事务并提交。故障表现成"任务未完成"，掩盖了"数据已污染"。 - 单元测试全绿。 根因 GORM 的链式 Where...
 
 ---
 
@@ -412,18 +629,114 @@ Redis key char:live_room:room_content:v2:catalog_version 值被污染为 "386\n"
 
 ---
 
-### [Learn Session Knowledge](./skills/learn-session-knowledge/SKILL.md)
+### [Agent 行为评测与优化](./skills/improving-agent-behavior/SKILL.md)
 
 **分类**: skills
 
-Job Turn a finished or interrupted session into reusable knowledge. Do not write a diary. Produce an artifact that another agent can use without seeing the original chat. First 3 Minutes If this skill...
+核心原则 执行 Execute → Evaluate → Optimize → Re-evaluate。历史轨迹已有 Execute 产物时，从 Evaluate 开始。 把评测与修改分开：先用证据测评并与用户讨论，再获得针对精确修改清单的确认，最后修改和复测。 <HARD-GATE> 在完成 Eval、讨论方案并获得用户对精确修改清单的明确确认前，不得修改任何规则、Skill、测试、业务代码或外...
 
 ---
 
-### [GitHub Browser Create Files](./skills/github-browser-create-files/SKILL.md)
+### [BE 后端评审](./skills/backend-review/SKILL.md)
 
 **分类**: skills
 
-Hard Constraints - Do not use git push, GitHub write APIs, or direct repository upload controls. - Do not click Upload files. - Do not use Playwright setInputFiles or inputtype="file". - Use GitHub we...
+本技能整理已有后端结构、Go 可读性、消费点覆盖与 ID 精度规则。默认只读，不因评审而修改代码或发布；按用户给定的范围选用模块，不把所有专项强制执行一遍。 选择已有检查模块 | 用户任务或改动证据 | 读取材料 | 交付 | |---|---|---| | 结构、职责、规则分叉、状态所有权、隐藏副作用或配置发布依赖 | 结构评审references/structure.md | 结构发现、配置发...
+
+---
+
+### [GitHub Web Publish](./skills/github-web-publish/SKILL.md)
+
+**分类**: skills
+
+通过当前可用的 Computer Use 能力操作已连接且已登录的 Chrome，在 GitHub 网页中编辑、创建或上传仓库文件，并完成网页提交与结果验证。 硬性边界 - 只使用 GitHub 网页提供的 Edit、Create new file、Upload files 和 Commit changes 等界面完成远程写入。 - 使用当前环境提供的 Computer Use 接口并遵守它当轮返...
+
+---
+
+### [FE 前端评审](./skills/frontend-review/SKILL.md)
+
+**分类**: skills
+
+保持前端变更可读、可评审，并按职责划分。优先使用清晰的领域名称，避免在大组件中堆积内联实现。默认只读；用户明确要求实现或重构时，使用文末已有的实现清单。 评审前定位 评审或编辑前先确认： - 框架和项目现有约定。 - 本次涉及的文件和行数。 - 改动属于页面级功能、复用 UI、数据转换、样式调整还是有状态行为。 - 检查实际调用关系，确定新增或抽取的组件、hook 所属的最小范围，并统计该范围内已...
+
+---
+
+### [《[项目名] 架构评估》](./skills/architecture-decision-rfc/template.md)
+
+**分类**: skills
+
+0. 背景与范围 - 背景： - 当前痛点： - 目标： - 非目标： - 关键约束（时间/人力/兼容/成本）： - PRD： - Figma 文件及相关页面/节点： - 现有实现证据： - Figma 适用性（已读取/证据不足/不适用及理由）： - PRD、Figma、Tech Design、现有实现的冲突与决策： 1. 问题陈述 1.1 架构范式差异 - 当前范式： - 新需求范式： - 冲突...
+
+---
+
+### [架构评估自检清单](./skills/architecture-decision-rfc/checklist.md)
+
+**分类**: skills
+
+输入证据与交互 - 是否判断本方案是否影响用户可见页面或交互 - 适用时是否实际读取相关 Figma 页面、节点、原型连线和注释，而非只看截图 - 不适用时是否记录“Figma 不适用”及理由 - Figma 缺失或无法访问时，是否将方案完整性标记为证据不足 - 是否覆盖主路径、loading、空态、成功、失败、重试、取消和重复操作 - 是否将关键交互映射到接口、字段、状态所有者、后端副作用及幂等...
+
+---
+
+### [架构评估与决策](./skills/architecture-decision-rfc/SKILL.md)
+
+**分类**: skills
+
+用于把“想法讨论”收敛为“可执行方案”。 使用方式 1. 收集输入：背景、现状、目标、约束、非目标、时间窗口、PRD、Figma 和现有实现。 2. 判断是否涉及用户可见页面或交互： - 适用时实际读取相关 Figma 页面、节点、原型连线和注释，提取状态、动作、异常分支和数据需求。 - 无法找到或访问 Figma 时，将其列为阻塞方案完整性的待确认项，不凭经验补全。 - 纯基础设施或无 UI 变...
+
+---
+
+### [zsh-compatible: use find instead of glob to avoid NOMATCH error](./skills/plan-eng-review/SKILL.md)
+
+**分类**: skills
+
+<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly --> <!-- Regenerate: bun run gen:skill-docs --> Preamble run first If PROACTIVE is "false", do not proactively suggest gstack skills AND d...
+
+---
+
+### [Release Orchestrator](./skills/release-orchestrator/SKILL.md)
+
+**分类**: skills
+
+把已经开发完成的 Feature 安全地逐步发布。先在内部建立完整依赖图，再一次只交付一个当前可执行的 MR；前序发布和验证没有完成时，不推进后续 MR。 入口边界 把以下内容视为已在开发阶段完成： - 代码 review、测试和必要修复。 - 配置与发布依赖的完整性审查。 - Feature 的开发依赖或发布依赖文档维护。 - 最终 feat 分支作为功能代码真相源。 不要调用其他 code r...
+
+---
+
+### [技术方案交互、接口与数据评审](./skills/tech-design-data-review/SKILL.md)
+
+**分类**: skills
+
+基于 Figma 交互、实际接口、请求预算、耗时证据、调用路径、SQL、DDL、索引和容量证据给出可执行的评审结论。不要只复述 Tech Design，也不要把个人偏好包装成 Finding。 评审边界 - 默认只读评审；除非用户明确要求，否则不要修改代码、文档、数据库或远端状态。 - 优先检查用户给出的 PRD、Figma、Tech Design、MR/PR 和代码；缺少材料时再搜索关联实现。 ...
+
+---
+
+### [Go 代码可读性](./skills/backend-review/references/go-readability.md)
+
+**分类**: skills
+
+执行只读审核。除非用户明确要求修改，否则不要编辑被审代码。 审核边界 只报告本次变更新增或明显加剧的问题。阅读足够的调用者、类型定义和测试来理解变更，但不要把审核扩张为历史代码清理。 本层只回答“代码是否容易被准确理解和安全修改”。以下内容只记录为待进入其他审核层的风险，不在没有证据时下结论： - 业务逻辑是否正确。 - 是否存在数据竞争、死锁或内存模型问题。 - 性能、容量和资源消耗是否满足目标...
+
+---
+
+### [代码结构评审](./skills/backend-review/references/structure.md)
+
+**分类**: skills
+
+实现完成后的结构体检，只读。除非用户明确要求，不改被审代码。 关注结构和可维护性：规则有没有分叉、状态归谁管、抽象值不值、体量是否失控、配置有没有漏登记。 不猎 bug（那是 code review / 安全评审的活），不追覆盖率数字，不提格式化偏好。 审查重构时同时比较变更前后，核对规则实现数量、状态所有者、调用跳转、可变状态入口和契约是否收敛。用户要求判断重构目标时可以说明仍存缺口，但不将未加...
+
+---
+
+### [消费点覆盖与标识符完整性](./skills/backend-review/references/dependency-and-identifiers.md)
+
+**分类**: skills
+
+对被多处消费的依赖做覆盖面体检，对跨边界标识符做精度完整性检查。只读；除非用户明确要求，不改被审代码。 根据 diff 回答适用的问题： - 依赖覆盖：这次改造是否覆盖了该依赖的全部消费点；没覆盖的是否是有意保留。 - 标识符完整性：标识符从生产到消费是否保持逐位一致，是否可能因浮点数或隐式类型转换映射到另一主体。 本模块不查结构好坏（结构由同包 structure.md 覆盖），不做与上述两类风...
+
+---
+
+### [Agent 行为 Eval 量表](./skills/improving-agent-behavior/references/evaluation-rubric.md)
+
+**分类**: skills
+
+使用边界 只评价样本中可见的消息、工具操作和产物。先还原当时 Agent 能知道什么，再判断行为；不要依据隐藏推理、后来补充的信息或最终结果反推当时必然犯错。 样本不完整时标记未知。除非表达方式造成误解、延迟或范围漂移，否则不评价个人风格。 评分 对每个维度给出 0～4 分并引用证据： - 4：行为完整可靠，没有实质缺口。 - 3：总体正确，存在轻微但不影响主目标的缺口。 - 2：部分正确，但有明...
 
 ---

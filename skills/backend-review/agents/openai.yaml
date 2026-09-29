@@ -1,0 +1,4 @@
+interface:
+  display_name: "BE 后端评审"
+  short_description: "按需检查后端结构、Go 可读性、共享依赖消费点与标识符精度"
+  default_prompt: "使用 $backend-review 只读评审本次后端变更，选择实际适用的结构、Go、消费点覆盖或 ID 精度模块，并说明范围。"

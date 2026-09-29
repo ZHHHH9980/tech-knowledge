@@ -1,4 +1,0 @@
-interface:
-  display_name: "Go Code Readability Review"
-  short_description: "审查 Go 代码的类型表达、控制流、命名和抽象可读性"
-  default_prompt: "使用 $go-code-readability-review 审查这个 Go diff 的可读性，只报告会显著增加理解或维护成本的问题。"
