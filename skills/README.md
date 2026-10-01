@@ -6,6 +6,7 @@
 |---|---|---|
 | FE 实现 | [frontend-review](frontend-review/SKILL.md) | 组件与 hook 归属、JSX/Tailwind、文件边界与抽象；明确要求修改时沿用实现清单 |
 | BE 实现 | [backend-review](backend-review/SKILL.md) | 结构与发布依赖、Go 可读性、共享依赖消费点、ID 精度；按需读取参考材料 |
+| 数据库设计 | [database-design-review](database-design-review/SKILL.md) | 记录粒度、实体边界、PK/FK、关系与 1NF–3NF；结合业务语义审查冗余、快照与计算字段 |
 | 方案 | [tech-design-data-review](tech-design-data-review/SKILL.md) | 交互、接口、请求预算、分页、SQL/索引、容量、推送隔离与频控 |
 | 方案编写 | [architecture-decision-rfc](architecture-decision-rfc/SKILL.md) | 方案比较、架构决策与迁移计划 |
 | 工程计划 | [plan-eng-review](plan-eng-review/SKILL.md) | 已有 gstack 工程评审，依赖相应 gstack 环境 |
