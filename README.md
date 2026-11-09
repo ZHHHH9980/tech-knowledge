@@ -74,3 +74,36 @@ project: 项目名（可选）
 适用场景：关系型数据库建模入门，以及表结构设计前的基础复习。原文以 Access 桌面数据库为例。
 
 由此启发：[database-design-review](skills/database-design-review/SKILL.md)。阅读本文后，将实体划分、主外键、表关系和规范化等思路整理成数据库设计评审 skill；结合后续业务讨论，补充了当前属性与历史快照、可重算结果与结算事实的区分。
+
+
+## 个人 AI 工作配置备份
+
+本仓库同时保存个人 AI 工作配置与通用工程经验，便于在新机器恢复工作方式。
+
+```text
+PLUGINS.md
+claude/
+└── scripts/
+    ├── mcp-toggle.sh
+    └── mcp-toggle-notice.sh
+memory/
+├── feedback_interview_style.md
+└── generic/
+    ├── feedback_cr-deletion-consume-map.md
+    ├── feedback_local-compile-before-ci.md
+    ├── feedback_no_regex_infer_business.md
+    ├── feedback_downstream_contract_test.md
+    ├── feedback_shared-claim-query-index.md
+    ├── no-db-constraints.md
+    ├── explore-on-latest-final-feat-not-stale-worktree.md
+    ├── scan_hotpath_performance.md
+    ├── feedback_post_investigation_memory.md
+    ├── memory-layer1-tool-result-valve.md
+    └── user_interview_prep.md
+skills/
+├── backend-review/references/
+│   ├── structure.md
+│   └── go-readability.md
+├── tech-design-data-review/
+└── improving-agent-behavior/
+```
